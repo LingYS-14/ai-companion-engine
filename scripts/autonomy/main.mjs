@@ -70,7 +70,8 @@ import { installLifecycle } from "../../dist/assembly/lifecycle.js";
 import { runSayMode } from "../../dist/assembly/say-mode.js";
 import { lastContactMinutes, readSituationSignals } from "../../dist/assembly/situation-signals.js";
 import { describeInputActivity } from "../../dist/autonomy/input-activity.js";
-import { resolveAutonomyConfig } from "../../dist/autonomy/config.js";
+import { resolveAutonomyConfig, DEFAULT_AUTONOMY } from "../../dist/autonomy/config.js";
+import { readQqProactiveConfig } from "../../dist/autonomy/onebot-config.js";
 import { AutonomyLoop } from "../../dist/autonomy/loop.js";
 import { chatComplete, formatUsageLog, loadLlmConfig } from "../../dist/autonomy/llm.js";
 // P2（task-139）：网页聊天——共享对话流水 + daemon 侧一轮。
@@ -82,7 +83,10 @@ import { OWNER_VISITOR } from "../../dist/ports/visitor.js";
 import { appraiseFromText } from "../../dist/psychology/appraisal-qq.js";
 import { makeOneBotSpeaker } from "../../dist/qq/onebot-speak.js";
 import { createPortActions } from "../../dist/autonomy/port.js";
-import { createStandalonePort } from "../../dist/autonomy/standalone.js";
+import { createStandalonePort, SPEAK_QUIET_FROM, SPEAK_QUIET_TO } from "../../dist/autonomy/standalone.js";
+// 2026-11 社交主动性：读视频详情 → 决定动作 → 写弹幕/评论/点赞。写接口必须登录态。
+import { planActivity } from "../../dist/bili/activity.js";
+import { getVideoDetail, likeVideo, postComment, postDanmaku } from "../../dist/bili/write.js";
 import {
   buildInsightPrompt,
   emptyLedger,
@@ -295,6 +299,14 @@ function logUsage(task, reply) {
   if (line !== undefined) log(line);
 }
 
+/** 从环境变量读数值；缺省/空串/NaN 都回落调用方给的默认值 */
+function envNumber(name, fallback) {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === "") return fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : fallback;
+}
+
 /**
  * task-137：写通道的 handler 抛错时带机器可读 code。
  * 写通道服务端会把 err.code 原样放进响应（`{ok:false,error,code}`），插件据此映射提示。
@@ -359,6 +371,19 @@ function readWorkdays() {
 /** 从插件配置里读 OneBot 连接参数；读不到就返回 null（她只写日记，不对外说） */
 function readOneBot() {
   return readOneBotConfig(join(repo, "cordis.patch.yml"));
+}
+
+/**
+ * 读 `qq.proactive`：F271 之后主动开口只发生在常驻进程里，这一段是唯一消费者。
+ * 读不到就回落 AutonomyConfig 的默认值（不关功能，也不猜一个更激进的值）。
+ */
+function readQqProactive() {
+  try {
+    return readQqProactiveConfig(readFileSync(join(repo, "cordis.patch.yml"), "utf8"));
+  } catch (err) {
+    log(`[autonomy] qq.proactive 读取失败，回落默认节奏：${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  }
 }
 
 function localParts(now) {
@@ -468,6 +493,34 @@ async function main() {
   // F326 方案 A：人格卡加载期体检整段删除（卡已不存在，六层人格不再从卡读）。
 
   loadEnvFile(join(dataDir, "autonomy.env"));
+
+  // 社交节奏：data/autonomy.env 可覆盖（分钟/次数），默认值唯一来源是 AutonomyConfig。
+  // 用 env 而不是 cordis.patch.yml 顶层新键，是因为插件没有声明 autonomy 段，新增键没人校验。
+  const socialEveryMin = envNumber("ACE_SOCIAL_INTERVAL_MIN", DEFAULT_AUTONOMY.socialIntervalMs / 60_000);
+  const socialDailyMax = envNumber("ACE_SOCIAL_DAILY_MAX", DEFAULT_AUTONOMY.socialDailyMax);
+  const socialCommentDailyMax = envNumber("ACE_SOCIAL_COMMENT_DAILY_MAX", DEFAULT_AUTONOMY.socialCommentDailyMax);
+
+  // 主动开口节奏：唯一来源是 qq.proactive（常驻进程是 F271 之后唯一消费者）。
+  // enabled=false 时循环不再规划 proactive；minGap/maxPerDay 直接进 bridge 的机械门。
+  const qqProactive = readQqProactive();
+  const proactiveEveryMin =
+    qqProactive?.checkEveryMin !== undefined && qqProactive.checkEveryMin > 0
+      ? qqProactive.checkEveryMin
+      : DEFAULT_AUTONOMY.proactiveIntervalMs / 60_000;
+  const proactiveMinGapMin = qqProactive?.minGapMin ?? DEFAULT_AUTONOMY.proactiveMinGapMs / 60_000;
+  const proactiveMaxPerDay = qqProactive?.maxPerDay ?? DEFAULT_AUTONOMY.proactiveMaxPerDay;
+  const proactiveOptions = {
+    enabled: qqProactive?.enabled ?? true,
+    minGapMs: Math.max(0, proactiveMinGapMin) * 60_000,
+    maxPerDay: Math.max(0, proactiveMaxPerDay),
+    quietFrom: SPEAK_QUIET_FROM,
+    quietTo: SPEAK_QUIET_TO,
+  };
+  log(
+    `[autonomy] 主动节奏 check=${String(proactiveEveryMin)}min gap=${String(proactiveMinGapMin)}min max=${String(proactiveMaxPerDay)}/day enabled=${String(proactiveOptions.enabled)}；` +
+      `社交 check=${String(socialEveryMin)}min max=${String(socialDailyMax)}/day 评论=${String(socialCommentDailyMax)}/day`,
+  );
+
   const journal = SelftalkJournal.open(join(dataDir, `selftalk-${characterId}.json`));
   // task-169 C：生成侧回声自检（QQ 主动开口用；网页回复/replay 旧路径按 E3 不接）。
   // 参照文本 = 她最近说过的话（chat log 的「她」那侧）+ 自述来源记忆 + 最近 24h 日记。
@@ -847,6 +900,210 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
       deepReads: enriched,
       biliEmpty: failure === null && fetched === 0,
     };
+  };
+
+  // ── 社交主动性（2026-11）───────────────────────────────────────────────
+  // 主动性不再只用来“找他说话”：每拍刷一条 B 站视频，按预算决定留弹幕/评论/赞。
+  // 预算与动作选择在 src/bili/activity.ts（纯函数、可穷举单测）；这里只做 IO 与账本。
+  const socialLedgerPath = join(dataDir, `social-${characterId}.ndjson`);
+
+  /** 账本：一行一次尝试（含 watch），用来算当天额度、冷却与“这条视频互动过没有” */
+  function readSocialLedger(nowMs) {
+    const today = dayKey(nowMs, tzOffsetMinutes);
+    const entries = [];
+    try {
+      if (!existsSync(socialLedgerPath)) return { entries, today };
+      for (const line of readFileSync(socialLedgerPath, "utf8").split(/\r?\n/)) {
+        if (line.trim() === "") continue;
+        try {
+          const entry = JSON.parse(line);
+          if (entry !== null && typeof entry === "object" && typeof entry.at === "number") entries.push(entry);
+        } catch {
+          // 坏行跳过：账本不该让进程起不来
+        }
+      }
+    } catch (err) {
+      log(`[social] 账本读取失败（按空账本处理）：${err instanceof Error ? err.message : String(err)}`);
+    }
+    return { entries, today };
+  }
+
+  function appendSocialLedger(entry) {
+    try {
+      appendFileSync(socialLedgerPath, `${JSON.stringify(entry)}\n`, "utf8");
+    } catch (err) {
+      log(`[social] 账本写入失败：${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  /** 让模型写一句弹幕/评论；按码点截断，避免把 emoji 切成半个 */
+  async function composeSocialText(action, detail, model) {
+    const limit = action === "danmaku" ? 20 : 60;
+    const kind = action === "danmaku" ? "弹幕" : "评论";
+    const messages = [
+      {
+        role: "system",
+        content:
+          `你是「${displayName}」，在 B 站刷到一条视频，想以普通观众身份留一句${kind}。` +
+          `口语、短、像真人；不解释身份，不@人，不引战，不刷屏。只输出这一句话，不超过${String(limit)}字。`,
+      },
+      {
+        role: "user",
+        content: `标题：${detail.title}\n简介：${(detail.description === "" ? "（无）" : detail.description).slice(0, 200)}`,
+      },
+    ];
+    const reply = await chatComplete(model, messages, { task: "social", maxTokens: 120 });
+    logUsage("social", reply);
+    const line = reply.text
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^["'“”‘’]+|["'“”‘’]+$/g, "")
+      .trim();
+    if (line === "") throw new Error("模型返回空句子");
+    return Array.from(line).slice(0, limit).join("");
+  }
+
+  const socialImpl = async () => {
+    const nowMs = Date.now();
+    const { entries, today } = readSocialLedger(nowMs);
+    const todayEntries = entries.filter((entry) => dayKey(entry.at, tzOffsetMinutes) === today);
+    const writes = todayEntries.filter(
+      (entry) => entry.action === "danmaku" || entry.action === "comment" || entry.action === "like",
+    );
+    const lastAt = entries.reduce((max, entry) => (entry.at > max ? entry.at : max), 0);
+    const session = loadBiliSession(dataDir, characterId);
+    const deps = { fetchFn: fetch, now: () => nowMs, log, ...(session === null ? {} : { session }) };
+
+    // 配置为 0 = 关掉社交：连热门都不拉（与 planActivity 的判定一致，省一次网络）
+    if (socialDailyMax <= 0) {
+      return { action: "skip", ok: false, reason: "社交已关闭（每日上限 0）" };
+    }
+
+    let videos;
+    try {
+      videos = await fetchPopular(deps, { pageSize: 20 });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      log(`[social] 热榜拉取失败：${reason}`);
+      return { action: "skip", ok: false, reason: "热榜拉取失败" };
+    }
+    // 今天已经在这条视频下留过痕迹就换一条：同一条反复刷容易被当成机器人。
+    const candidates = videos.filter(
+      (video) =>
+        !looksUnsuitable(video) &&
+        !looksOffTopic(video).offTopic &&
+        !todayEntries.some((entry) => entry.bvid === video.bvid),
+    );
+    if (candidates.length === 0) {
+      log("[social] 今天的热门都互动过了，等下一轮热榜刷新");
+      return { action: "skip", ok: false, reason: "今天的热门都互动过了" };
+    }
+
+    let detail = null;
+    let video = null;
+    for (const candidate of candidates.slice(0, 3)) {
+      const fetched = await getVideoDetail(deps, candidate.bvid);
+      if (fetched !== null) {
+        detail = fetched;
+        video = candidate;
+        break;
+      }
+    }
+    if (detail === null || video === null) {
+      log("[social] 候选视频详情都取不到，跳过这一拍");
+      return { action: "skip", ok: false, reason: "详情取不到" };
+    }
+
+    // liked 跨天有效：点过就不重复点；actedToday 用今天账本判定。
+    const liked = entries.some((entry) => entry.bvid === detail.bvid && entry.action === "like" && entry.ok === true);
+    const plan = planActivity({
+      now: nowMs,
+      lastActionAt: lastAt > 0 ? lastAt : null,
+      todayActions: writes.length,
+      todayDanmaku: writes.filter((entry) => entry.action === "danmaku").length,
+      todayComments: writes.filter((entry) => entry.action === "comment").length,
+      video: {
+        bvid: detail.bvid,
+        durationSec: detail.durationSec > 0 ? detail.durationSec : video.durationSec,
+        liked,
+        actedToday: todayEntries.some((entry) => entry.bvid === detail.bvid),
+      },
+      energy: runtime.state.energy,
+      asleep: runtime.sleepInfo().asleep === true,
+      hasSession: session !== null,
+      config: {
+        intervalMs: socialEveryMin * 60_000,
+        dailyMax: socialDailyMax,
+        // 给“评论”和“点赞”各留一个位置：默认 4 次/天 = 2 弹幕 + 1 评论 + 1 赞。
+        danmakuDailyMax: Math.max(0, socialDailyMax - socialCommentDailyMax - 1),
+        commentDailyMax: socialCommentDailyMax,
+        likeEnabled: true,
+      },
+    });
+
+    if (plan.action === "skip") {
+      log(`[social] skip reason=${plan.reason}`);
+      return { action: "skip", ok: false, reason: plan.reason };
+    }
+
+    let action = plan.action;
+    let generated = false;
+    let text = "";
+    if (action === "danmaku" || action === "comment") {
+      const model = portDeps.llm;
+      if (model === null || model === undefined) {
+        // 没有模型凭据也能点赞：不因为写不出话就整拍放弃。
+        action = liked ? "watch" : "like";
+        log(`[social] 没有模型凭据：${plan.action} 降级为 ${action}`);
+      } else {
+        // 生成即计费：即使写接口失败，这一拍也花过模型额度，standalone 要记账。
+        generated = true;
+        try {
+          text = await composeSocialText(action, detail, model);
+        } catch (err) {
+          const reason = err instanceof Error ? err.message : String(err);
+          log(`[social] 文案生成失败，降级：${reason}`);
+          action = liked ? "watch" : "like";
+        }
+      }
+    }
+
+    let result;
+    try {
+      if (action === "danmaku") {
+        result = await postDanmaku(deps, {
+          bvid: detail.bvid,
+          cid: detail.cid,
+          text,
+          progressMs: plan.progressMs ?? 0,
+        });
+      } else if (action === "comment") {
+        result = await postComment(deps, { aid: detail.aid, text });
+      } else if (action === "like") {
+        result = await likeVideo(deps, { aid: detail.aid });
+      } else {
+        result = { ok: true, code: 0, message: "只看不写" };
+      }
+    } catch (err) {
+      // 写客户端本身不抛；这里兜底，保证一拍失败不会打断整个循环。
+      result = { ok: false, code: -1, message: err instanceof Error ? err.message : String(err) };
+    }
+
+    const entry = {
+      at: nowMs,
+      bvid: detail.bvid,
+      action,
+      ok: result.ok,
+      code: result.ok ? 0 : result.code,
+      reason: result.message.slice(0, 200),
+      ...(generated ? { generated: true } : {}),
+    };
+    appendSocialLedger(entry);
+    log(
+      `[social] action=${action} bvid=${detail.bvid} ok=${String(result.ok)} code=${String(result.code)}` +
+        `${generated ? " generated=1" : ""} reason=${result.message.slice(0, 80)}`,
+    );
+    return { action, ok: result.ok, reason: result.message, generated, bvid: detail.bvid };
   };
 
   // 洞见账本：同一个标签 7 天内只写一次（见 dist/autonomy/insight.js 的冷却理由）
@@ -1865,7 +2122,7 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
               return { opened: false, reason: "outlet", generated: false };
             }
             const intentCtx = lastIntentContext;
-            const r = await qqHandle.bridge.proactive(undefined, intentCtx);
+            const r = await qqHandle.bridge.proactive(proactiveOptions, intentCtx);
             // A5：她判断"此刻不宜打扰"→ 不发送，但这次判断同样记回意图表（held）。
             if (r.verdict === "held" && intentCtx?.intentionId !== undefined) {
               try {
@@ -1993,6 +2250,7 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
             };
           },
         }),
+    socialImpl,
     log,
     ...(intentTickImpl === undefined ? {} : { intentTickImpl }),
     // P1 真出口（自言自语）：同一拍的由头给 selftalk 用；没有就退回旧提示词。
@@ -2417,7 +2675,18 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
     return;
   }
 
-  const config = resolveAutonomyConfig({ enabled: autonomyOn });
+  // 主动性节奏全部来自配置：qq.proactive（消息侧）+ autonomy.env 的 ACE_SOCIAL_*（B 站侧）。
+  // 默认值在 AutonomyConfig 里只有一份；这里只把“分钟”换算成毫秒。
+  const config = resolveAutonomyConfig({
+    enabled: autonomyOn,
+    proactiveEnabled: proactiveOptions.enabled,
+    proactiveIntervalMs: proactiveEveryMin * 60_000,
+    proactiveMinGapMs: proactiveOptions.minGapMs,
+    proactiveMaxPerDay: proactiveOptions.maxPerDay,
+    socialIntervalMs: socialEveryMin * 60_000,
+    socialDailyMax,
+    socialCommentDailyMax,
+  });
   const loop = new AutonomyLoop({
     config,
     actions,

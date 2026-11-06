@@ -28,6 +28,28 @@ describe("自主运行：配置", () => {
     expect(cfg.consolidateHour).toBe(3);
     expect(cfg.lockStaleMs).toBe(DEFAULT_AUTONOMY.lockStaleMs);
   });
+
+  it("主动性默认调稀：消息 20min 检查 / ≥2h 间隔 / 3 条一天；社交 20min / 4 次", () => {
+    const cfg = resolveAutonomyConfig();
+    expect(cfg.proactiveIntervalMs).toBe(20 * MIN);
+    expect(cfg.proactiveMinGapMs).toBe(120 * MIN);
+    expect(cfg.proactiveMaxPerDay).toBe(3);
+    expect(cfg.proactiveEnabled).toBe(true);
+    expect(cfg.socialIntervalMs).toBe(20 * MIN);
+    expect(cfg.socialDailyMax).toBe(4);
+    expect(cfg.socialCommentDailyMax).toBe(1);
+  });
+
+  it("计数类配置允许 0（0 = 关掉），非法值回落", () => {
+    const cfg = resolveAutonomyConfig({ socialDailyMax: 0, socialCommentDailyMax: 0, proactiveMaxPerDay: 0, proactiveEnabled: false });
+    expect(cfg.socialDailyMax).toBe(0);
+    expect(cfg.socialCommentDailyMax).toBe(0);
+    expect(cfg.proactiveMaxPerDay).toBe(0);
+    expect(cfg.proactiveEnabled).toBe(false);
+    const bad = resolveAutonomyConfig({ socialDailyMax: -1, socialCommentDailyMax: Number.NaN });
+    expect(bad.socialDailyMax).toBe(DEFAULT_AUTONOMY.socialDailyMax);
+    expect(bad.socialCommentDailyMax).toBe(DEFAULT_AUTONOMY.socialCommentDailyMax);
+  });
 });
 
 describe("自主运行：tick 规划", () => {
@@ -35,16 +57,43 @@ describe("自主运行：tick 规划", () => {
 
   it("全都没到期就什么都不做", () => {
     const recent = 12 * HOUR - MIN;
-    const history = { lastStateAt: recent, lastLearnAt: recent, lastProactiveAt: recent, lastSelfTalkAt: recent, lastConsolidateDay: "2026-10-29" };
+    const history = { lastStateAt: recent, lastLearnAt: recent, lastProactiveAt: recent, lastSelfTalkAt: recent, lastSocialAt: recent, lastConsolidateDay: "2026-10-29" };
     expect(planTick({ ...base, history, config: { ...DEFAULT_AUTONOMY, enabled: true } }).actions).toEqual([]);
   });
 
   it("到期才做；巩固每天一次且只在指定小时", () => {
     const cfg = { ...DEFAULT_AUTONOMY, enabled: true };
     const plan = planTick({ ...base, localHour: 3, history: { ...EMPTY_HISTORY, lastConsolidateDay: "2026-10-28" }, config: cfg });
-    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
-    const again = planTick({ now: 3 * HOUR + 6 * MIN, localHour: 3, localDay: "2026-10-29", history: { lastStateAt: 3 * HOUR + 2 * MIN, lastLearnAt: 3 * HOUR + 2 * MIN, lastProactiveAt: 3 * HOUR + 2 * MIN, lastSelfTalkAt: 3 * HOUR + 2 * MIN, lastConsolidateDay: "2026-10-29" }, config: cfg });
+    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
+    const again = planTick({ now: 3 * HOUR + 6 * MIN, localHour: 3, localDay: "2026-10-29", history: { lastStateAt: 3 * HOUR + 2 * MIN, lastLearnAt: 3 * HOUR + 2 * MIN, lastProactiveAt: 3 * HOUR + 2 * MIN, lastSelfTalkAt: 3 * HOUR + 2 * MIN, lastSocialAt: 3 * HOUR + 2 * MIN, lastConsolidateDay: "2026-10-29" }, config: cfg });
     expect(again.actions).toEqual([]);
+  });
+
+  it("social 按自己的节奏到期，不受 proactive 的开关影响", () => {
+    const cfg = { ...DEFAULT_AUTONOMY, enabled: true, socialIntervalMs: 20 * MIN, proactiveEnabled: false };
+    const recent = 12 * HOUR - MIN;
+    const history = {
+      lastStateAt: recent,
+      lastLearnAt: recent,
+      lastProactiveAt: recent,
+      lastSelfTalkAt: recent,
+      lastSocialAt: recent,
+      lastConsolidateDay: "2026-10-29",
+    };
+    const base = { now: 12 * HOUR, localHour: 12, localDay: "2026-10-29" };
+    expect(planTick({ ...base, history, config: cfg }).actions).toEqual([]);
+
+    const due = planTick({ ...base, history: { ...history, lastSocialAt: 12 * HOUR - 21 * MIN }, config: cfg });
+    expect(due.actions).toEqual(["social"]);
+    expect(due.reason).toContain("social due");
+
+    // proactiveEnabled=false 时即使间隔到了也不规划主动开口
+    const noProactive = planTick({
+      ...base,
+      history: { ...history, lastSocialAt: 12 * HOUR, lastProactiveAt: 12 * HOUR - 21 * MIN },
+      config: cfg,
+    });
+    expect(noProactive.actions).not.toContain("proactive");
   });
 
   it("推进历史只记真正跑过的动作", () => {
@@ -52,6 +101,7 @@ describe("自主运行：tick 规划", () => {
     expect(h.lastStateAt).toBe(1000);
     expect(h.lastProactiveAt).toBe(1000);
     expect(h.lastLearnAt).toBe(0);
+    expect(h.lastSocialAt).toBe(0);
     expect(h.lastConsolidateDay).toBe("");
   });
 
@@ -129,6 +179,7 @@ describe("自主运行：循环", () => {
         consolidate: () => calls.push("consolidate"),
         proactive: () => calls.push("proactive"),
         selftalk: () => calls.push("selftalk"),
+        social: () => calls.push("social"),
         log: () => undefined,
       },
       lockPath: over.lockPath ?? join(dir, "w.lock"),
@@ -151,8 +202,8 @@ describe("自主运行：循环", () => {
   it("启用后执行到期的动作并推进历史", async () => {
     const { loop, calls } = baseDeps();
     const plan = await loop.runOnce();
-    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
-    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
+    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
     expect(loop.snapshot().history.lastLearnAt).toBe(3 * HOUR);
     expect(loop.snapshot().running).toBe(false);
   });
@@ -173,6 +224,7 @@ describe("自主运行：循环", () => {
         consolidate: () => calls.push("consolidate"),
         proactive: () => calls.push("proactive"),
         selftalk: () => calls.push("selftalk"),
+        social: () => calls.push("social"),
         intentTick: () => {
           intentRuns += 1;
           return tickGate;
@@ -198,8 +250,8 @@ describe("自主运行：循环", () => {
 
     release();
     const firstPlan = await first;
-    expect(firstPlan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
-    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(firstPlan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
+    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
   });
 
   it("另一个进程持有新锁时跳过，不执行动作", async () => {
@@ -229,6 +281,7 @@ describe("P1 意图节拍挂在循环上（可选、失败隔离）", () => {
         consolidate: () => calls.push("consolidate"),
         proactive: () => calls.push("proactive"),
         selftalk: () => calls.push("selftalk"),
+        social: () => calls.push("social"),
         ...(extra.intentTick === undefined ? {} : { intentTick: extra.intentTick }),
         log: () => undefined,
       },
@@ -245,8 +298,8 @@ describe("P1 意图节拍挂在循环上（可选、失败隔离）", () => {
     const seen: number[] = [];
     const { loop, calls, dir } = make({ intentTick: (now) => seen.push(now) });
     const plan = await loop.runOnce();
-    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
-    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
+    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
     expect(seen).toEqual([3 * HOUR]);
     rmSync(dir, { recursive: true, force: true });
   });
@@ -262,6 +315,7 @@ describe("P1 意图节拍挂在循环上（可选、失败隔离）", () => {
         consolidate: () => calls.push("consolidate"),
         proactive: () => calls.push("proactive"),
         selftalk: () => calls.push("selftalk"),
+        social: () => calls.push("social"),
         intentTick: () => calls.push("intent"),
         log: () => undefined,
       },
@@ -300,7 +354,7 @@ describe("P1 意图节拍挂在循环上（可选、失败隔离）", () => {
       tzOffsetMinutes: 480,
     });
     const plan = await loop.runOnce();
-    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(plan.actions).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
     expect(logs.some((l) => l.includes("intentTick 失败") && l.includes("boom"))).toBe(true);
     expect(loop.snapshot().running).toBe(false);
     rmSync(dir, { recursive: true, force: true });
@@ -309,7 +363,7 @@ describe("P1 意图节拍挂在循环上（可选、失败隔离）", () => {
   it("不注入时完全回到旧行为（零副作用）", async () => {
     const { loop, calls, dir } = make();
     await loop.runOnce();
-    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(calls).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
     rmSync(dir, { recursive: true, force: true });
   });
 });
@@ -319,7 +373,7 @@ describe("自主运行：dry-run", () => {
     const dir = mkdtempSync(join(tmpdir(), "dry-"));
     const lockPath = join(dir, "dry.lock");
     const result = await runDryTick({ now: 3 * HOUR, localHour: 3, lockPath, tzOffsetMinutes: 480, pid: 7 });
-    expect(result.ran).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk"]);
+    expect(result.ran).toEqual(["tick", "learn", "consolidate", "proactive", "selftalk", "social"]);
     // 第一拍没有基准时间：只记基准、不推进（advance 拒绝 0 小时），也不该报错
     expect(result.log.join(String.fromCharCode(10))).not.toContain("hours 必须是正的有限数");
     expect(result.log.join("\n")).toContain("learn dry-run");
@@ -354,7 +408,7 @@ describe("自主运行：dry-run", () => {
     const dir = mkdtempSync(join(tmpdir(), "dry2-"));
     const lockPath = join(dir, "dry.lock");
     const result = await runDryTick({ now: 3 * HOUR, localHour: 3, lockPath, config: { enabled: false }, pid: 8 });
-    expect(result.ran.length).toBe(5);
+    expect(result.ran.length).toBe(6);
     expect(createDryRunPort().consolidate()).toEqual({ accepted: 0, rejected: 0 });
     rmSync(dir, { recursive: true, force: true });
   });

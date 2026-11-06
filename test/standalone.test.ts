@@ -1113,3 +1113,116 @@ describe("W1：学习计划里的网页触发（spec v2.3 §5.3）", () => {
     expect(out.webPlan).toBeUndefined();
   });
 });
+
+describe("standalone port：social 门（睡眠/审核/额度/能耗）", () => {
+  function make(over: {
+    socialImpl?: () => { action: "watch" | "like" | "danmaku" | "comment" | "skip"; ok: boolean; reason: string; generated?: boolean; bvid?: string };
+    usageFile?: string;
+    reviewFile?: string;
+    asleep?: boolean;
+    spent?: string[];
+  } = {}) {
+    const { runtime } = fakeRuntime();
+    const spent = over.spent ?? [];
+    return createStandalonePort({
+      runtime,
+      cfg,
+      journal: SelftalkJournal.open(join(tmp(), "j.json")),
+      now: () => NOW,
+      localHour: () => 3,
+      ...(over.socialImpl === undefined ? {} : { socialImpl: over.socialImpl }),
+      ...(over.usageFile === undefined ? {} : { usageFile: over.usageFile }),
+      ...(over.reviewFile === undefined ? {} : { reviewFile: over.reviewFile }),
+      ...(over.asleep === undefined ? {} : { sleepState: () => ({ asleep: over.asleep === true, phase: "deep" }) }),
+      spendEnergy: (kind) => spent.push(kind),
+    });
+  }
+
+  it("睡眠中连匿名浏览都不做", async () => {
+    let called = 0;
+    const out = await make({ asleep: true, socialImpl: () => { called += 1; return { action: "watch", ok: true, reason: "x" }; } }).social();
+    expect(called).toBe(0);
+    expect(out).toMatchObject({ action: "skip", ok: false, reason: "睡眠中" });
+  });
+
+  it("未接线时返回 skip，不抛异常", async () => {
+    const out = await make().social();
+    expect(out).toMatchObject({ action: "skip", ok: false, reason: "社交通路未接线" });
+  });
+
+  it("有一小时额度上限内的调用时直接跳过，不调 socialImpl", async () => {
+    const usageFile = join(tmp(), "usage.json");
+    writeFileSync(usageFile, JSON.stringify({ version: 1, calls: Array.from({ length: 61 }, (_, i) => NOW - i * 1000) }));
+    let called = 0;
+    const out = await make({ usageFile, socialImpl: () => { called += 1; return { action: "danmaku", ok: true, reason: "x" }; } }).social();
+    expect(called).toBe(0);
+    expect(out.reason).toMatch(/额度不够|hourly calls/);
+  });
+
+  it("审核票据未解除时不进入社交", async () => {
+    const dir = tmp();
+    const usageFile = join(dir, "usage.json");
+    const reviewFile = join(dir, "autonomy-review.json");
+    writeFileSync(usageFile, JSON.stringify({ version: 1, calls: Array.from({ length: 61 }, (_, i) => NOW - i * 1000) }));
+    raiseReview(reviewFile, { at: NOW, reason: "test", calls: 61, maxCalls: 60 }, NOW);
+    let called = 0;
+    const out = await make({ usageFile, reviewFile, socialImpl: () => { called += 1; return { action: "comment", ok: true, reason: "x" }; } }).social();
+    expect(called).toBe(0);
+    expect(out.reason).toMatch(/审核/);
+  });
+
+  it("真发出一条弹幕：记账一次并扣 social 能耗", async () => {
+    const usageFile = join(tmp(), "usage.json");
+    const spent: string[] = [];
+    const out = await make({
+      usageFile,
+      spent,
+      socialImpl: () => ({ action: "danmaku", ok: true, reason: "弹幕额度未满", generated: true, bvid: "BV1" }),
+    }).social();
+    expect(out.action).toBe("danmaku");
+    expect(loadUsage(usageFile, NOW)).toEqual([NOW]);
+    expect(spent).toEqual(["social"]);
+  });
+
+  it("只看不写（watch）成功也不扣能、不记模型额度", async () => {
+    const usageFile = join(tmp(), "usage.json");
+    const spent: string[] = [];
+    const out = await make({
+      usageFile,
+      spent,
+      socialImpl: () => ({ action: "watch", ok: true, reason: "只看不写" }),
+    }).social();
+    expect(out.action).toBe("watch");
+    expect(loadUsage(usageFile, NOW)).toEqual([]);
+    expect(spent).toEqual([]);
+  });
+
+  it("点赞成功扣能，但没有生成文案就不占模型额度", async () => {
+    const usageFile = join(tmp(), "usage.json");
+    const spent: string[] = [];
+    await make({ usageFile, spent, socialImpl: () => ({ action: "like", ok: true, reason: "留一个赞" }) }).social();
+    expect(loadUsage(usageFile, NOW)).toEqual([]);
+    expect(spent).toEqual(["social"]);
+  });
+
+  it("生成了文案但平台拒绝：记模型额度、不扣写作能耗", async () => {
+    const usageFile = join(tmp(), "usage.json");
+    const spent: string[] = [];
+    const out = await make({
+      usageFile,
+      spent,
+      socialImpl: () => ({ action: "comment", ok: false, reason: "B 站写接口 code=12002", generated: true }),
+    }).social();
+    expect(out.ok).toBe(false);
+    expect(loadUsage(usageFile, NOW)).toEqual([NOW]);
+    expect(spent).toEqual([]);
+  });
+
+  it("socialImpl 抛错只记日志并返回 skip，不打断循环", async () => {
+    const spent: string[] = [];
+    const out = await make({ spent, socialImpl: () => { throw new Error("网络断了"); } }).social();
+    expect(out).toMatchObject({ action: "skip", ok: false });
+    expect(out.reason).toContain("网络断了");
+    expect(spent).toEqual([]);
+  });
+});

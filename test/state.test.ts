@@ -169,13 +169,14 @@ describe("§4.6 优先级与阈值真源", () => {
 });
 
 describe("注册表接入：不出现裸数字、不留静默默认", () => {
-  it("附录 A 93 项 + v5.4 overlay（62 键，1 个 text 占位被结构化替换），计数三方一致", () => {
+  it("附录 A 93 项 + v5.4 overlay（63 键，1 个 text 占位被结构化替换），计数三方一致", () => {
     // v5.4-P1 S0：overlay 只加不覆盖，唯一的例外是把 EMOTION_DYNAMICS 的 text 占位补成结构化值，
-    // 所以总数 = 93 + 62 − 1 = 154（overlay 62 键 = v5.4-P1 的 23 键 + 内部言语 7 键 + 视频深读 4 键
+    // 所以总数 = 93 + 63 − 1 = 155（overlay 63 键 = v5.4-P1 的 23 键 + 内部言语 7 键 + 视频深读 4 键
     // + BOND_DRIVE_ZERO + 时间观 P2a 的 8 个 RHYTHM_* + P3-2a 的 6 个 ENERGY_* 与 3 个 SLEEP_*
-    // + P3-3 的 ENERGY_COST_LEARN_DEEP + W1 的 6 个 WEB_* + 回声室 A.15 的 3 个 ECHO_*），
+    // + P3-3 的 ENERGY_COST_LEARN_DEEP + W1 的 6 个 WEB_* + 回声室 A.15 的 3 个 ECHO_*
+    // + 2026-11 社交主动性的 ENERGY_COST_SOCIAL），
     // 而 meta.counts 描述的仍是 engine.json 基线（93）。
-    expect(Object.keys(cfg.knobs).length).toBe(154);
+    expect(Object.keys(cfg.knobs).length).toBe(155);
     expect(cfg.meta.counts.total).toBe(93);
     expect(cfg.meta.counts.hot).toBe(18);
     expect(cfg.meta.counts.perArchetype).toBe(10);

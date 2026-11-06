@@ -124,20 +124,22 @@ describe("B：认知事件耗能（energyCost）", () => {
   });
 });
 
-describe("energyCostFor：5 个已批准事件", () => {
-  it("turn/learn/proactive/selftalk/consolidate 读 overlay 注册值", () => {
+describe("energyCostFor：已批准的认知事件", () => {
+  it("turn/learn/proactive/selftalk/consolidate/learn_deep/social 读 overlay 注册值", () => {
     expect(energyCostFor(cfg, "turn")).toBe(0.0156);
     expect(energyCostFor(cfg, "learn")).toBe(0.003);
     expect(energyCostFor(cfg, "proactive")).toBe(0.004);
     expect(energyCostFor(cfg, "selftalk")).toBe(0.002);
     expect(energyCostFor(cfg, "consolidate")).toBe(0.005);
+    expect(energyCostFor(cfg, "learn_deep")).toBe(0.006);
+    expect(energyCostFor(cfg, "social")).toBe(0.004);
   });
 
   it("事件集合外的名字直接拒绝", () => {
     expect(() => energyCostFor(cfg, "bogus" as EnergyCostKind)).toThrow(RangeError);
   });
 
-  it("kill switch：5 键置 0 后一律返回 0", () => {
+  it("kill switch：7 键置 0 后一律返回 0", () => {
     const kill = cloneConfig();
     for (const name of [
       "ENERGY_COST_TURN",
@@ -145,10 +147,12 @@ describe("energyCostFor：5 个已批准事件", () => {
       "ENERGY_COST_PROACTIVE",
       "ENERGY_COST_SELFTALK",
       "ENERGY_COST_CONSOLIDATE",
+      "ENERGY_COST_LEARN_DEEP",
+      "ENERGY_COST_SOCIAL",
     ]) {
       kill.knobs[name].value = 0;
     }
-    for (const kind of ["turn", "learn", "proactive", "selftalk", "consolidate"] as const) {
+    for (const kind of ["turn", "learn", "proactive", "selftalk", "consolidate", "learn_deep", "social"] as const) {
       expect(energyCostFor(kill, kind)).toBe(0);
     }
   });

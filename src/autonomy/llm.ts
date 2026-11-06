@@ -27,7 +27,7 @@ export interface LlmConfig {
  * 2026-11 起 DeepSeek 的模型默认开启 thinking（思考链按输出计费且默认 high），
  * 短输出/短 max_tokens 会被思考链吃掉 → 必须显式声明档位，而不是靠默认值。
  */
-export type LlmTask = "chat" | "proactive" | "selftalk" | "learn" | "insight" | "reconsolidation" | "dream" | "self_model";
+export type LlmTask = "chat" | "proactive" | "selftalk" | "learn" | "social" | "insight" | "reconsolidation" | "dream" | "self_model";
 
 export interface TaskModelPolicy {
   readonly model: string;
@@ -85,7 +85,7 @@ export const DEFAULT_LLM_TIMEOUT_MS = 90_000;
  *
  * 取舍（用户 2026-11-06「先考虑效果再考虑消耗」）：
  * - chat / self_model / reconsolidation / dream / insight → 需要「想一下」才像活的，用 pro；
- * - proactive / selftalk / learn → 短、快、口吻自然，thinking 反而会让句子变硬且拖慢，用 flash 非思考。
+ * - proactive / selftalk / learn / social → 短、快、口吻自然，thinking 反而会让句子变硬且拖慢，用 flash 非思考。
  */
 export function pickTaskPolicy(cfg: LlmConfig, task: LlmTask): TaskModelPolicy {
   const pro = cfg.proModel ?? DEFAULT_PRO_MODEL;
@@ -104,6 +104,9 @@ export function pickTaskPolicy(cfg: LlmConfig, task: LlmTask): TaskModelPolicy {
     case "selftalk":
     case "learn":
       return { model: cfg.model, thinking: "disabled", reasoningEffort: undefined, maxTokens: 400 };
+    // 社交短句（弹幕/评论）比主动开口还短：20/60 字，120 token 足够且不容易被截断。
+    case "social":
+      return { model: cfg.model, thinking: "disabled", reasoningEffort: undefined, maxTokens: 120 };
   }
 }
 

@@ -11,7 +11,7 @@
 import type { EngineConfig } from "../engine/config.js";
 import { dayKey } from "./tick-plan.js";
 import { chatComplete, type FetchLike, type LlmConfig, formatUsageLog } from "./llm.js";
-import type { AdvanceOutcome, AutonomyPort, ConsolidateOutcome, InsightOutcome, LearnOutcome, PortLearnInput, ProactiveOutcome, ReconsolidateOutcome, SelfTalkOutcome } from "./port.js";
+import type { AdvanceOutcome, AutonomyPort, ConsolidateOutcome, InsightOutcome, LearnOutcome, PortLearnInput, ProactiveOutcome, ReconsolidateOutcome, SelfTalkOutcome, SocialOutcome } from "./port.js";
 import { buildLearningWebPlan } from "./port.js";
 import { isRestDay, pacingFor, rateAlert, scaledIntervalMs, type WindowPacing } from "./pricing.js";
 import { describeSpeechReserve, shouldYieldForSpeech } from "./speech-reserve.js";
@@ -119,6 +119,14 @@ export interface StandaloneDeps {
   readonly drainFunnel?: (() => { readonly drained: number; readonly ingested: number }) | undefined;
   /** 主动开口：QQ 桥关着时脚本不注入，端口就永远返回「未开放」 */
   readonly proactiveImpl?: (() => ProactiveOutcome | Promise<ProactiveOutcome>) | undefined;
+  /**
+   * 外部互动（B 站刷视频 / 弹幕 / 评论 / 点赞）。
+   *
+   * 这一层只管三件事：睡眠时跳过、有审核票据时退避、成功后扣 `social` 能耗。
+   * 「今天还能发几条弹幕/评论」「这条视频点过赞没有」属于平台账本，由脚本的
+   * socialImpl 自己读 `data/social-<id>.ndjson` 判定——脊髓层不认识 B 站。
+   */
+  readonly socialImpl?: (() => SocialOutcome | Promise<SocialOutcome>) | undefined;
   /**
    * P1：意向引擎的一拍纯计算（可选）。
    *
@@ -418,6 +426,48 @@ export function createStandalonePort(deps: StandaloneDeps): StandalonePort {
         // P3-2b：B 通道——生成过台词（花过钱）才扣能
         deps.spendEnergy?.("proactive");
       }
+      return out;
+    },
+    social: async (): Promise<SocialOutcome> => {
+      // 睡眠是最硬的一道：连匿名浏览都不做（与 learn 的 P3 硬跳一致）
+      if (deps.sleepState?.().asleep === true) {
+        deps.log?.("[standalone] social 跳过：睡眠中（P3）");
+        return { action: "skip", ok: false, reason: "睡眠中" };
+      }
+      if (deps.socialImpl === undefined) {
+        return { action: "skip", ok: false, reason: "社交通路未接线" };
+      }
+      if (suspended()) {
+        deps.log?.("[standalone] social 跳过：审核未解除");
+        return { action: "skip", ok: false, reason: "审核中（退避）" };
+      }
+      const p = currentPacing();
+      prune(deps.now());
+      // 社交这一拍可能要调模型写弹幕/评论，所以先按「一次调用」占额度；
+      // 实际只有 generated=true 时才记账（点赞不花模型额度）。
+      if (callTimes.length + 1 > p.maxCallsPerHour) {
+        const reason = `额度不够（已用 ${String(callTimes.length)}/${String(p.maxCallsPerHour)}）`;
+        deps.log?.(`[standalone] social 跳过：${reason}`);
+        return { action: "skip", ok: false, reason };
+      }
+      const gate = rateAlert(callTimes.length, p);
+      if (gate.alert) {
+        tripReview(callTimes.length, p.maxCallsPerHour, gate.reason);
+        deps.log?.(`[standalone] social 跳过：${gate.reason}`);
+        return { action: "skip", ok: false, reason: gate.reason };
+      }
+      let out: SocialOutcome;
+      try {
+        out = await deps.socialImpl();
+      } catch (err) {
+        // 平台侧失败已经在 socialImpl 里记账；这里兜底，绝不让一个网络错误打断循环
+        const reason = err instanceof Error ? err.message : String(err);
+        deps.log?.(`[standalone] social 失败：${reason}`);
+        return { action: "skip", ok: false, reason };
+      }
+      if (out.generated === true) recordCall();
+      // 只有真的落到对方站点（点赞/弹幕/评论）才扣能；watch/skip 不收费。
+      if (out.ok && out.action !== "watch" && out.action !== "skip") deps.spendEnergy?.("social");
       return out;
     },
     selftalk: async (): Promise<SelfTalkOutcome> => {

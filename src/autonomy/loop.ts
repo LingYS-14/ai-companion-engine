@@ -21,6 +21,8 @@ export interface AutonomyActions {
   consolidate(now: number): void | Promise<void>;
   /** 主动开口（真正的发送由 QQ 侧门控） */
   proactive(now: number): Promise<void> | void;
+  /** 外部互动（刷 B 站、弹幕、评论、点赞）；未接线时只记一行日志，不阻塞循环 */
+  social?(now: number): Promise<void> | void;
   /** 内部言语（自言自语）：写记忆元数据 + 日志；没有实现时跳过，不阻塞循环 */
   selftalk?(now: number): Promise<void> | void;
   /**
@@ -131,6 +133,9 @@ export class AutonomyLoop {
           else if (action === "selftalk") {
             if (actions.selftalk === undefined) actions.log?.("[autonomy] selftalk 未接线，跳过");
             else await actions.selftalk(now);
+          } else if (action === "social") {
+            if (actions.social === undefined) actions.log?.("[autonomy] social 未接线，跳过");
+            else await actions.social(now);
           } else await actions.proactive(now);
           ran.push(action);
         } catch (err) {

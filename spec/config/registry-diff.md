@@ -1,6 +1,6 @@
 # 注册表 diff（engine.json vs v54.overlay.json）
 
-> 由 tools/audit/check_registry.mjs 自动生成；engine 93 键 + overlay 62 键。
+> 由 tools/audit/check_registry.mjs 自动生成；engine 93 键 + overlay 63 键。
 
 | 键 | engine.json | v54.overlay.json | 变化 |
 | --- | --- | --- | --- |
@@ -51,6 +51,7 @@
 | ENERGY_COST_TURN | — | 0.0156（energy/次） | ＋新增 |
 | ENERGY_COST_LEARN | — | 0.003（energy/次） | ＋新增 |
 | ENERGY_COST_PROACTIVE | — | 0.004（energy/次） | ＋新增 |
+| ENERGY_COST_SOCIAL | — | 0.004（energy/次） | ＋新增 |
 | ENERGY_COST_SELFTALK | — | 0.002（energy/次） | ＋新增 |
 | ENERGY_COST_CONSOLIDATE | — | 0.005（energy/次） | ＋新增 |
 | SLEEP_MIN_WINDOW_HOURS | — | 4（h） | ＋新增 |

@@ -943,6 +943,27 @@
    ],
    "calibration": "P3 §2.3 B 通道：一次主动开口（proactive）的认知耗能——整理念头并组织一句话。"
   },
+  "ENERGY_COST_SOCIAL": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.004",
+   "value": 0.004,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "2026-11 社交主动性改造：一次落到 B 站的互动（点赞/弹幕/评论）的认知耗能——刷一条视频 + 组织一句短话。与 proactive 同价（都含一次短句生成），点赞不额外计价。"
+  },
   "ENERGY_COST_SELFTALK": {
    "kind": "number",
    "timeBase": "per-event",

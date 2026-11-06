@@ -512,12 +512,14 @@ describe("task-57：装配层接线（main.mjs / tools.ts 源码锁定）", () =
     expect(runtime).toContain("this.sleep = initialPersistedSleep(null, this.clock.now());");
   });
 
-  it("standalone 的三个硬跳与三处 B 扣费都在", () => {
+  it("standalone 的四个硬跳与四处 B 扣费都在", () => {
     const standalone = source("src/autonomy/standalone.ts");
-    expect(standalone.match(/sleepState\?\.\(\)\.asleep === true/g) ?? []).toHaveLength(3);
+    expect(standalone.match(/sleepState\?\.\(\)\.asleep === true/g) ?? []).toHaveLength(4);
     expect(standalone).toContain('spendEnergy?.("learn")');
     expect(standalone).toContain('spendEnergy?.("proactive")');
     expect(standalone).toContain('spendEnergy?.("selftalk")');
+    // 2026-11 社交主动性：只有真的落到 B 站（弹幕/评论/点赞）才扣能
+    expect(standalone).toContain('spendEnergy?.("social")');
   });
 
   it("runtime 的 [sleep] 行和 Persisted.sleep 字段存在", () => {
