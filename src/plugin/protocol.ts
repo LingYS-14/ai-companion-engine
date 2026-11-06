@@ -59,7 +59,7 @@ export const PROTOCOL_RULES: readonly ProtocolRule[] = [
 
 /** 注入系统提示的完整文本 */
 export const PROTOCOL_TEXT: string = [
-  "【Anime Soul Engine】本会话装载了有状态角色内核，工具前缀 `soul_`。按下面的顺序用它，不要跳过、也不要念数字。",
+  "【AI Companion Engine】本会话装载了有状态角色内核，工具前缀 `soul_`。按下面的顺序用它，不要跳过、也不要念数字。",
   ...PROTOCOL_RULES.map((rule, i) => `${i + 1}. ${rule.text}`),
 ].join("\n");
 

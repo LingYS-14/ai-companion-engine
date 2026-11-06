@@ -1,6 +1,6 @@
 {
   "name": "ai-companion-engine",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "AI Companion Engine —— 一个长期在线的 AI 伙伴内核：长期记忆、自主意图、睡眠节律、QQ 与网页双通道 · DSH 插件",
@@ -15,7 +15,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-name/ai-companion-engine"
+    "url": "https://github.com/LingYS-14/ai-companion-engine"
+  },
+  "homepage": "https://github.com/LingYS-14/ai-companion-engine#readme",
+  "bugs": {
+    "url": "https://github.com/LingYS-14/ai-companion-engine/issues"
   },
   "engines": {
     "node": ">=20"

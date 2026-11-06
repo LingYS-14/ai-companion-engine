@@ -1,5 +1,5 @@
 /**
- * Anime Soul Engine —— DSH Host 插件入口。
+ * AI Companion Engine —— DSH Host 插件入口。
  *
  * 形态决策（为什么是"注册工具"而不是"自己起一个 LLM 循环"）：
  *   DSH 里的 agent 本身就是 LLM，插件再去接一个模型只会引入第二套会话、

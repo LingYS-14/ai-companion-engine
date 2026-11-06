@@ -102,6 +102,21 @@ test/               286 测试文件
 - QQ 桥只连接你配置的 OneBot 实现；`dryRun: true` 可以只生成不发送。
 - 详见 [docs/SECURITY.md](docs/SECURITY.md)。
 
+## ⚠️ 敏感能力警告（请务必阅读）
+
+本仓库的 `scripts/` 下包含几个**针对腾讯 QQ 客户端内部实现的只读研究脚本**：
+
+| 脚本 | 做什么 | 风险 |
+| --- | --- | --- |
+| `scripts/qqdb_probe.py` | 用 frida attach `QQ.exe`，枚举 sqlite3 符号，探索 hook `sqlite3_prepare_v2` 读取消息库 | 注入第三方闭源客户端，可能违反 QQ 用户协议 |
+| `scripts/dbprobe.py` | 只读扫描 QQ 进程内存，判断 SQLCipher salt 是否可获取 | 涉及读取第三方进程内存 |
+| `scripts/qq_mitigations.py` | 查询 QQ 进程的 mitigation policy（ACG / 强制签名等） | 探索绕过客户端防护的可行性 |
+| `scripts/whoami_il.py` | 读取进程完整性级别（Low/Medium/High/System） | 低风险，辅助诊断 |
+
+**这些脚本不是产品功能，也不在 `npm run gate` 的覆盖范围内。** 它们只在开发者的**本机、本人账号**上做过可行性验证，用于回答「能不能不登录第三方客户端就读到自己的消息」这一个工程问题。请不要用它们读取他人的数据，不要用于绕过任何访问控制，也不要在未获授权的设备上运行。
+
+公开发布此仓库不代表腾讯或任何第三方授权了上述用法；**使用者需自行承担由此产生的用户协议、个人信息保护法及当地法律风险**。如果你 fork 或二次分发，建议先删除 `scripts/` 下的这四个探针脚本，或至少保留本警告。
+
 ## 许可
 
 MIT。示例角色卡（`persona/example.json`）与 `assets/avatar.png` 为占位示例，可自由替换。
