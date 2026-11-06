@@ -1,0 +1,65 @@
+name: Bug 报告
+description: 报告一个可复现的缺陷或异常行为
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你花时间反馈问题。提交前请先搜索[已有 issue](https://github.com/LingYS-14/ai-companion-engine/issues)，确认这个问题还没有被报告过。
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请按顺序列出能稳定复现该问题的操作步骤。
+      placeholder: |
+        1. 打开……
+        2. 执行……
+        3. 观察到……
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      description: 你认为正确的行为应该是什么？
+      placeholder: 我期望……
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？如果控制台或日志里有报错，请粘贴完整内容。
+      placeholder: 实际……（可粘贴报错信息或日志）
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 出现该问题的版本号或提交哈希，例如 v0.1.0、c6ca241。
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 操作系统、Node.js 版本、运行方式（DSH 插件 / 独立运行时 / 开发调试）等。
+      placeholder: Windows 11，Node.js 22，DSH 插件
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 补充信息
+      description: 截图、相关日志片段或其他有助于定位问题的信息。
+    validations:
+      required: false
