@@ -1,0 +1,16 @@
+# EditorConfig 配置文件，说明见 https://editorconfig.org
+# 统一编码、换行、缩进与空白，避免不同编辑器产生无关 diff。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# TypeScript / JSON / YAML / Markdown 等文本文件：2 空格缩进
+[*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,yml,yaml,md,mdx}]
+indent_style = space
+indent_size = 2
