@@ -307,12 +307,14 @@ export function idleTick(s: SState, dtHours: number, cfg: EngineConfig): TickTra
 }
 
 /**
- * B 通道（认知事件耗能）的事件集合——已批准的 6 类，不允许调用方自定义名字。
+ * B 通道（认知事件耗能）的事件集合——已批准的 7 类，不允许调用方自定义名字。
  *
  * 第 6 类 `learn_deep` 由 P3-3 能量↔学习耦合评审扩展：深读一条视频笔记
  * （补字幕/画面、可复盘）比普通"学了一轮"更贵，单独计价；0 = 关闭该成本。
+ * 第 7 类 `social` 由 2026-11 社交主动性改造加入：一次真的落到 B 站的互动
+ * （点赞/弹幕/评论）包含刷视频与组织一句短话，和 proactive 同价；只看不写不计费。
  */
-export type EnergyCostKind = "turn" | "learn" | "proactive" | "selftalk" | "consolidate" | "learn_deep";
+export type EnergyCostKind = "turn" | "learn" | "proactive" | "selftalk" | "consolidate" | "learn_deep" | "social";
 
 const ENERGY_COST_KNOBS: Readonly<Record<EnergyCostKind, string>> = {
   turn: "ENERGY_COST_TURN",
@@ -321,6 +323,7 @@ const ENERGY_COST_KNOBS: Readonly<Record<EnergyCostKind, string>> = {
   selftalk: "ENERGY_COST_SELFTALK",
   consolidate: "ENERGY_COST_CONSOLIDATE",
   learn_deep: "ENERGY_COST_LEARN_DEEP",
+  social: "ENERGY_COST_SOCIAL",
 };
 
 /**

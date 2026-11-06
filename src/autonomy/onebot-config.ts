@@ -96,3 +96,73 @@ export function readOneBotConn(yaml: string): OneBotConn | null {
   const peerName = (values.get("peerName") ?? "").trim() || DEFAULT_PEER_NAME;
   return { baseUrl, token, peer, dryRun: values.get("dryRun") === "true", wsUrl, wsToken, owner, peerName };
 }
+
+/**
+ * `qq.proactive` 的窄解析结果。
+ *
+ * 字段允许 undefined：配置里没写的键不在这里补默认值，交给 `resolveAutonomyConfig`
+ * 或调用方自己的默认表——否则「没配」和「配成默认值」在日志里就分不出来了。
+ */
+export interface QqProactiveConfig {
+  readonly enabled: boolean | undefined;
+  readonly minGapMin: number | undefined;
+  readonly maxPerDay: number | undefined;
+  readonly checkEveryMin: number | undefined;
+}
+
+function nonNegativeOrUndefined(raw: string | undefined): number | undefined {
+  if (raw === undefined || raw === "") return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
+/**
+ * 读 `qq.proactive`：常驻进程的主动开口节奏现在由这里配置。
+ *
+ * 为什么不让插件继续管：F271 之后插件不再产生自主行为，主动开口唯一发生在常驻进程里；
+ * 这一段留在插件配置里只是历史位置，写在这里的人仍然只有一处可改（避免两份节奏漂移）。
+ * 解析不到就返回 null，调用方回落到 AutonomyConfig 的默认值，而不是关掉功能。
+ */
+export function readQqProactiveConfig(yaml: string): QqProactiveConfig | null {
+  const lines = yaml.split(/\r?\n/);
+  const qqHead = lines.findIndex((line) => {
+    const s = splitLine(line);
+    return s !== null && s.key === "qq";
+  });
+  if (qqHead < 0) return null;
+  const qqIndent = splitLine(lines[qqHead] ?? "")?.indent ?? 0;
+  let head = -1;
+  let indent = 0;
+  for (let i = qqHead + 1; i < lines.length; i += 1) {
+    const line = lines[i] ?? "";
+    if (line.trim() === "" || line.trim().startsWith("#")) continue;
+    const here = line.length - line.trimStart().length;
+    if (here <= qqIndent) break;
+    const s = splitLine(line);
+    if (s === null) continue;
+    if (s.key === "proactive") {
+      head = i;
+      indent = here;
+      break;
+    }
+  }
+  if (head < 0) return null;
+  const values = new Map<string, string>();
+  for (let i = head + 1; i < lines.length; i += 1) {
+    const line = lines[i] ?? "";
+    if (line.trim() === "" || line.trim().startsWith("#")) continue;
+    const here = line.length - line.trimStart().length;
+    if (here <= indent) break;
+    const s = splitLine(line);
+    if (s === null) continue;
+    values.set(s.key, clean(s.value));
+  }
+  const enabledRaw = values.get("enabled");
+  const enabled = enabledRaw === "true" ? true : enabledRaw === "false" ? false : undefined;
+  return {
+    enabled,
+    minGapMin: nonNegativeOrUndefined(values.get("minGapMin")),
+    maxPerDay: nonNegativeOrUndefined(values.get("maxPerDay")),
+    checkEveryMin: nonNegativeOrUndefined(values.get("checkEveryMin")),
+  };
+}

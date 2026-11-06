@@ -126,6 +126,22 @@ export interface ProactiveOutcome {
   readonly generated?: boolean;
 }
 
+/**
+ * 外部互动（B 站）的一拍结果。
+ *
+ * 动作名与 src/bili/activity.ts 的 SocialAction 对齐；这里用字面量而不 import，
+ * 是为了让脊髓层不依赖具体平台模块（换平台时端口形状不用动）。
+ */
+export interface SocialOutcome {
+  readonly action: "watch" | "like" | "danmaku" | "comment" | "skip";
+  /** 这次互动是否真的成功落到对方站点；skip/watch 恒为 false */
+  readonly ok: boolean;
+  readonly reason: string;
+  /** 这一拍是否真的调了模型（账本只给“花了钱”的拍记额度） */
+  readonly generated?: boolean;
+  readonly bvid?: string;
+}
+
 import type { AutonomyActions } from "./loop.js";
 
 export interface AutonomyPort {
@@ -137,6 +153,8 @@ export interface AutonomyPort {
   consolidate(): ConsolidateOutcome | Promise<ConsolidateOutcome>;
   /** 主动开口：真正发不发由 QQ 侧的门控决定，这里只请求一次「要不要开口」 */
   proactive(): ProactiveOutcome | Promise<ProactiveOutcome>;
+  /** 外部互动：刷 B 站 + 可选弹幕/评论/点赞（可选；没接就跳过） */
+  social?(): SocialOutcome | Promise<SocialOutcome>;
   /** 内部言语：想一句、落一条日志（可能调模型，所以允许异步） */
   selftalk(): Promise<SelfTalkOutcome> | SelfTalkOutcome;
   /** P1：意向引擎的一拍纯计算（可选；没接就跳过，接了也不发送、不调模型） */
@@ -178,6 +196,16 @@ export function createPortActions(
       const out = await port.proactive();
       log(`[autonomy] proactive opened=${String(out.opened)} reason=${out.reason}`);
     },
+    ...(port.social === undefined
+      ? {}
+      : {
+          social: async (): Promise<void> => {
+            const social = port.social;
+            if (social === undefined) return;
+            const out = await social();
+            log(`[autonomy] social action=${out.action} ok=${String(out.ok)} reason=${out.reason}`);
+          },
+        }),
     selftalk: async (): Promise<void> => {
       const out = await port.selftalk();
       log(`[autonomy] selftalk kind=${out.kind} relation=${out.relation}`);
@@ -200,6 +228,7 @@ export function createDryRunPort(): AutonomyPort {
     learn: () => ({ topic: "dry-run", keyword: "（未接真实学习）" }),
     consolidate: () => ({ accepted: 0, rejected: 0 }),
     proactive: () => ({ opened: false, reason: "dry-run" }),
+    social: () => ({ action: "skip", ok: false, reason: "dry-run" }),
     selftalk: () => ({ kind: "wander", relation: "unrelated" }),
   };
 }

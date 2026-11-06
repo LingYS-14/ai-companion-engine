@@ -6,7 +6,7 @@
 
 有两种跑法：
 
-1. **独立自治运行时**（推荐用于长期陪伴）：`scripts/autonomy/main.mjs` 作为常驻进程，每 5 分钟一拍，自己写数据、自己连 QQ。
+1. **独立自治运行时**（推荐用于长期陪伴）：`scripts/autonomy/main.mjs` 作为常驻进程，每 5 分钟一拍，自己写数据、自己连 QQ；主动性的大头是 B 站互动，见 [BILI-SOCIAL.md](BILI-SOCIAL.md)。
 2. **DSH 插件**：插件进程只做工具面与 Web 面板，数据由运行时持有（单写者），插件通过写通道调用。
 
 两者可以同时使用：DSH 里聊天、看工作台；运行时在后台负责 tick、睡眠、学习。
@@ -77,6 +77,8 @@ data/
   selftalk-<id>.json        自述日记
   dream-shadow-<id>.ndjson  dream 审计（可选）
   web-usage-<id>.json       网页额度账本
+  social-<id>.ndjson        B 站互动账本（当天预算从这算；见 docs/BILI-SOCIAL.md）
+  autonomy.env              本机节奏/凭据环境变量（可选，不随发布覆盖）
   .bak-* / .writer-lock.*   备份与写锁
 ```
 
@@ -93,6 +95,7 @@ data/
 - `[learn] energy=… tier=…` — 学习分档
 - `[fade] / [sleep-work] / [sleep-work-onset] / [dream-shadow]` — 夜间功课
 - `[proactive] opened=true/false reason=…` — 主动开口
+- `[social] action=… bvid=… ok=… code=… reason=…` — B 站互动（含 skip 原因）
 
 排障顺序：`health.mjs` → 日志尾部 200 行 → `data/state-*.json` → 对应模块测试。
 
@@ -103,6 +106,8 @@ data/
 | `health` 报「进程未运行」 | 看日志是否有启动异常；常见是 `dist` 未重建（先 `npm run build` 再 `npm run start`） |
 | `[autonomy] proactive 失败` | 装配层闭包错误；看堆栈行号，召回最近改动 |
 | 主动开口少 | 看 `[proactive] opened=false reason=outlet/gap/daily/sleeping`；`outlet` 表示这拍没有可说话的内容 |
+| `[social] skip` 很多 | 看 reason：睡眠/能量/冷却/额度满/今天已互动过；节奏在 `data/autonomy.env` 的 `ACE_SOCIAL_*` 或 `cordis.patch.yml` 的 `qq.proactive` |
+| B 站写操作失败 | `[social]` 行里的 `code`：`-3` 缺登录态/`bili_jct`，`-1` 网络，B 站业务码见 docs/BILI-SOCIAL.md |
 | 夜间功课不触发 | 确认 `[sleep] phase=asleep` 后同拍出现 `[sleep-work-onset]`；无 `asleepSince` 会空转 |
 | QQ 不回 | `health` 看 onebot 状态；`cordis.patch.yml` 的 `qq.enabled/dryRun/token` |
 | 模型回复为空 | thinking 未显式声明（见 `docs/DESIGN.md` §7） |

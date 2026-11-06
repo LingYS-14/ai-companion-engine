@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readOneBotConn } from "../src/autonomy/onebot-config.js";
+import { readOneBotConn, readQqProactiveConfig } from "../src/autonomy/onebot-config.js";
 
 const YAML = [
   "        qq:",
@@ -76,5 +76,67 @@ describe("OneBotConn：桥归属与 WS 参数", () => {
     expect(conn?.owner).toBe("autonomy");
     expect(conn?.wsToken).toBe("w");
     expect(conn?.wsUrl).toBe("ws://127.0.0.1:3999");
+  });
+});
+
+describe("readQqProactiveConfig：主动开口节奏从插件配置读", () => {
+  const BLOCK = [
+    "        qq:",
+    "          enabled: false",
+    "          proactive:",
+    "            # 常驻进程消费：20 分钟看一次，2 小时才真开口",
+    "            enabled: true",
+    "            minGapMin: 120   # ≥2h",
+    '            maxPerDay: "3"',
+    "            checkEveryMin: 20",
+    "          onebot:",
+    "            enabled: true",
+    "            baseUrl: http://127.0.0.1:3000",
+  ].join("\n");
+
+  it("读出四个键，注释与引号都能处理", () => {
+    expect(readQqProactiveConfig(BLOCK)).toEqual({
+      enabled: true,
+      minGapMin: 120,
+      maxPerDay: 3,
+      checkEveryMin: 20,
+    });
+  });
+
+  it("缺字段留 undefined，不替调用方补默认值", () => {
+    const yaml = ["qq:", "  proactive:", "    enabled: false"].join("\n");
+    expect(readQqProactiveConfig(yaml)).toEqual({
+      enabled: false,
+      minGapMin: undefined,
+      maxPerDay: undefined,
+      checkEveryMin: undefined,
+    });
+  });
+
+  it("没有 qq 段或没有 proactive 段 → null", () => {
+    expect(readQqProactiveConfig("trace: true")).toBeNull();
+    expect(readQqProactiveConfig("qq:\n  enabled: false\n  onebot:\n    enabled: true")).toBeNull();
+  });
+
+  it("不会被 onebot 段里的同名键误抓：只读 proactive 的缩进块", () => {
+    const yaml = [
+      "qq:",
+      "  onebot:",
+      "    maxPerDay: 99",
+      "  proactive:",
+      "    maxPerDay: 2",
+      "  enabled: true",
+    ].join("\n");
+    expect(readQqProactiveConfig(yaml)?.maxPerDay).toBe(2);
+  });
+
+  it("非法数字 / 非布尔值按没配处理", () => {
+    const yaml = ["qq:", "  proactive:", "    enabled: yes", "    minGapMin: -5", "    maxPerDay: abc", "    checkEveryMin: 1.5"].join("\n");
+    expect(readQqProactiveConfig(yaml)).toEqual({
+      enabled: undefined,
+      minGapMin: undefined,
+      maxPerDay: undefined,
+      checkEveryMin: 1.5,
+    });
   });
 });

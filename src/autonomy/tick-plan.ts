@@ -11,7 +11,7 @@
 
 import type { AutonomyConfig } from "./config.js";
 
-export type AutonomyAction = "tick" | "learn" | "consolidate" | "proactive" | "selftalk";
+export type AutonomyAction = "tick" | "learn" | "consolidate" | "proactive" | "selftalk" | "social";
 
 export interface TickHistory {
   /** 上次推进状态（毫秒时间戳），没跑过为 0 */
@@ -22,6 +22,8 @@ export interface TickHistory {
   readonly lastProactiveAt: number;
   /** 上次内部言语（自言自语），没跑过为 0 */
   readonly lastSelfTalkAt: number;
+  /** 上次外部互动（刷 B 站 / 弹幕 / 评论），没跑过为 0 */
+  readonly lastSocialAt: number;
   /** 上次睡眠巩固的本地日期（YYYY-MM-DD），没跑过为 "" */
   readonly lastConsolidateDay: string;
 }
@@ -31,6 +33,7 @@ export const EMPTY_HISTORY: TickHistory = {
   lastLearnAt: 0,
   lastProactiveAt: 0,
   lastSelfTalkAt: 0,
+  lastSocialAt: 0,
   lastConsolidateDay: "",
 };
 
@@ -87,13 +90,17 @@ export function planTick(input: TickInput): TickPlan {
     actions.push("consolidate");
     reasons.push("sleep consolidate");
   }
-  if (now - history.lastProactiveAt >= config.proactiveIntervalMs) {
+  if (config.proactiveEnabled && now - history.lastProactiveAt >= config.proactiveIntervalMs) {
     actions.push("proactive");
     reasons.push("proactive check");
   }
   if (now - history.lastSelfTalkAt >= config.selfTalkIntervalMs) {
     actions.push("selftalk");
     reasons.push("selftalk due");
+  }
+  if (now - history.lastSocialAt >= config.socialIntervalMs) {
+    actions.push("social");
+    reasons.push("social due");
   }
 
   return { actions, reason: reasons.length === 0 ? "nothing due" : reasons.join(", ") };
@@ -111,6 +118,7 @@ export function advanceHistory(
     lastLearnAt: ran.includes("learn") ? now : history.lastLearnAt,
     lastProactiveAt: ran.includes("proactive") ? now : history.lastProactiveAt,
     lastSelfTalkAt: ran.includes("selftalk") ? now : history.lastSelfTalkAt,
+    lastSocialAt: ran.includes("social") ? now : history.lastSocialAt,
     lastConsolidateDay: ran.includes("consolidate") ? localDay : history.lastConsolidateDay,
   };
 }
