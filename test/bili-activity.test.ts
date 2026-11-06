@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SOCIAL_ENERGY_FLOOR,
   planActivity,
+  summarizeSocialDay,
   type SocialActivityInput,
 } from "../src/bili/activity.js";
 
@@ -143,5 +144,32 @@ describe("B 站互动决策：弹幕位置", () => {
   it("时长未知时 progress=0", () => {
     const plan = planActivity(input({ video: { bvid: "BV1", durationSec: Number.NaN, liked: false, actedToday: false } }));
     expect(plan.progressMs).toBe(0);
+  });
+});
+
+describe("当天账本折算：额度只认成功，账号级失败要挡住重试", () => {
+  it("成功的弹幕/评论/点赞都计入额度，失败的尝试不计", () => {
+    const summary = summarizeSocialDay([
+      { at: 1, action: "danmaku", ok: true, code: 0 },
+      { at: 2, action: "comment", ok: true, code: 0 },
+      { at: 3, action: "like", ok: true, code: 0 },
+      { at: 4, action: "danmaku", ok: false, code: -400 },
+      { at: 5, action: "watch", ok: true, code: 0 },
+    ]);
+    expect(summary.actions).toBe(3);
+    expect(summary.danmaku).toBe(1);
+    expect(summary.comments).toBe(1);
+    expect(summary.blocked.size).toBe(0);
+  });
+
+  it("账号未转正/等级不足记成 blocked，其它失败（网络/参数）不算", () => {
+    const summary = summarizeSocialDay([
+      { at: 1, action: "comment", ok: false, code: -107 },
+      { at: 2, action: "danmaku", ok: false, code: 36705 },
+      { at: 3, action: "danmaku", ok: false, code: -400 },
+      { at: 4, action: "like", ok: false, code: -1 },
+    ]);
+    expect([...summary.blocked].sort()).toEqual(["comment", "danmaku"]);
+    expect(summary.actions).toBe(0);
   });
 });

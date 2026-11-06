@@ -78,6 +78,12 @@ describe("B 站写客户端：发弹幕", () => {
     expect(body.get("msg")).toBe("这段真好听");
     expect(body.get("progress")).toBe("12345");
     expect(body.get("bvid")).toBe("BV1xx411c7mD");
+    // Web 端 dm/post 的必填外观字段：漏掉会被 B 站判成 -400「请求错误」。
+    expect(body.get("mode")).toBe("1");
+    expect(body.get("fontsize")).toBe("25");
+    expect(body.get("color")).toBe("16777215");
+    expect(body.get("pool")).toBe("0");
+    expect(body.get("plat")).toBe("1");
     expect(body.get("csrf")).toBe("CSRF-VALUE-456");
   });
 

@@ -198,7 +198,8 @@ async function postForm(
 
 /**
  * 发一条弹幕。
- * 表单按 B 站当前接口（x/v2/dm/post）要求传 type=1、oid=cid、progress=毫秒、bvid。
+ * 表单按 B 站当前接口（x/v2/dm/post）要求传：type=1、oid=cid、msg、progress=毫秒、bvid，
+ * 以及 Web 端必填的 mode/fontsize/color/pool/plat——漏掉后面几个会被判成 -400「请求错误」。
  */
 export async function postDanmaku(deps: BiliWriteDeps, input: DanmakuInput): Promise<BiliWriteResult> {
   const bvid = input.bvid.trim();
@@ -221,6 +222,11 @@ export async function postDanmaku(deps: BiliWriteDeps, input: DanmakuInput): Pro
       ["msg", text],
       ["progress", String(progressMs)],
       ["bvid", bvid],
+      ["mode", "1"], // 1=滚动弹幕
+      ["fontsize", "25"],
+      ["color", "16777215"], // 白色
+      ["pool", "0"], // 0=普通弹幕池
+      ["plat", "1"], // 1=Web 端
       ["csrf", session?.biliJct ?? ""],
     ],
     session,
