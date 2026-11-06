@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-01",
+  "note": "机器可读的「谁取代了谁」台账（v5.2 §12.2 P-A / 审计 M12-04）。每条登记一个被取代的规格条目/旋钮/断言/概念，并指向它现在变成了什么、证据在哪一行。tools/lint/superseded.mjs 会校验：id 唯一、引用可解析（knob 必须真在注册表里、文件必须真存在、证据行号必须真在文件里）、链可终止且不指向已删除条目。规则：只登记能在仓库里指到证据的取代关系，不写「我觉得应该」。",
+  "kinds": ["knob", "spec-section", "assertion", "concept", "schema", "module"],
+  "statuses": ["removed", "dormant", "renamed", "layer-moved", "retyped", "replaced", "deferred"],
+  "entries": [
+    {
+      "id": "DECAY_RATE",
+      "kind": "knob",
+      "status": "dormant",
+      "supersededBy": ["knob:KAPPA_PRESSURE"],
+      "reason": "衰减全部由一阶松弛承担（p ← p − κ(p−B) 的连续解就是指数衰减，再乘一次是重复计数）；DECAY_RATE 仍留在注册表里，但 §4.5 不再使用。",
+      "evidence": ["docs/DESIGN.md:1"],
+      "since": "v5.2 PATCH-V3"
+    },
+    {
+      "id": "boredom-drive",
+      "kind": "concept",
+      "status": "removed",
+      "supersededBy": ["knob:CURIOSITY_GAP_PEAK"],
+      "reason": "D13：boredom 退役，好奇缺口改为 curiosityGap = 1 − coverage_freshness，动机取倒 U 峰值 1/3；S 层白名单也删掉了 boredom 字段。",
+      "evidence": ["docs/DESIGN.md:1", "src/learning/curiosity.ts:95"],
+      "since": "V5.4-P1 S5"
+    },
+    {
+      "id": "bond-curve-four-stage",
+      "kind": "spec-section",
+      "status": "layer-moved",
+      "supersededBy": ["knob:PACING_RATE"],
+      "reason": "bond 曲线降级为表达层：关系阶段直读 bondProgress，推进由 PACING_RATE 三档速率 + valence 驱动，不再有四条曲线参与 stage 判定。",
+      "evidence": ["src/engine/bonds.ts:84"],
+      "since": "V5.2 BLOCK2"
+    },
+    {
+      "id": "emotion-dynamics-rounds",
+      "kind": "spec-section",
+      "status": "retyped",
+      "supersededBy": ["knob:EMOTION_DYNAMICS"],
+      "reason": "五情绪 onset/peak/recovery 的「轮数」改成 object：0..1 强度阈值 + recoveryHours；且只覆盖 joy/sadness/anger/fear 四条。",
+      "evidence": ["docs/DESIGN.md:1"],
+      "since": "V5.4-P1 S6"
+    },
+    {
+      "id": "closed-form-pressure-table",
+      "kind": "assertion",
+      "status": "removed",
+      "supersededBy": ["test:test/state.test.ts"],
+      "reason": "v5.2 的闭式表与它自己的 κ 公式不自洽（0.2+0.7/0.55 已打顶）；实现侧改为独立复算 + 测试锁值（g=0.05→0.29091、g=0.3→0.745455、g=0.7→打顶）。",
+      "evidence": ["docs/DESIGN.md:1", "test/state.test.ts:41"],
+      "since": "v5.3"
+    },
+    {
+      "id": "BREAK-eight-rounds",
+      "kind": "assertion",
+      "status": "removed",
+      "supersededBy": ["test:test/state.test.ts"],
+      "reason": "BREAK/LAZY 轮数被重测：si=1 第 6 轮 mask 0.3466 触发 BREAK、第 40 轮 energy<0.2 进 LAZY（v5.2 说 8 轮 / 49±5）。",
+      "evidence": ["docs/DESIGN.md:1", "test/state.test.ts:66"],
+      "since": "v5.3"
+    },
+    {
+      "id": "private_mask-leak",
+      "kind": "concept",
+      "status": "removed",
+      "supersededBy": ["code:src/dialogue/render.ts"],
+      "reason": "没有 private_mask 这一层数据；E 层泄漏改为按 mask 三档给一句 suppressInstruction（>0.7 透一点 / >0.35 压住 / else 只做表面回应）。",
+      "evidence": ["docs/DESIGN.md:1", "src/dialogue/render.ts:84"],
+      "since": "v5.3"
+    },
+    {
+      "id": "confidence-self-referential",
+      "kind": "spec-section",
+      "status": "removed",
+      "supersededBy": ["code:src/memory/lifecycle.ts"],
+      "reason": "原式 0.3*vividness + 0.7*confidence 是自指不动点，会收敛到 vividness 本身；改为 0.7*accuracy。",
+      "evidence": ["docs/DESIGN.md:1", "src/memory/lifecycle.ts:23"],
+      "since": "v5.3"
+    },
+    {
+      "id": "event-intensity-bond-channel",
+      "kind": "spec-section",
+      "status": "removed",
+      "supersededBy": ["code:src/engine/bonds.ts"],
+      "reason": "advance_bond_progress 的 event_intensity 通道被删；改由 valence 驱动 + PACING_RATE 三档，事件强度语义交给里程碑（A13）。",
+      "evidence": ["docs/DESIGN.md:1", "src/engine/bonds.ts:104"],
+      "since": "v5.3"
+    },
+    {
+      "id": "bond-valence-drive-origin",
+      "kind": "spec-section",
+      "status": "replaced",
+      "supersededBy": ["knob:BOND_DRIVE_ZERO"],
+      "reason": "valence 驱动在 2026-11-01 规格评审 A2 做第二次标定：零点 Z 与锚点 A 分离，drive=clamp((valence−Z)/(A−Z),−1,1)；锚点 0.5 处 drive=1，精确恢复 §5.2 的 15/40/80 轮。旧式 drive=(valence−0.5)×2 在锚点处恰为 0（死锁 A：平静=关系永不前进）。",
+      "evidence": ["src/engine/bonds.ts:104", "test/bonds.test.ts:84", "docs/DESIGN.md:1"],
+      "since": "V5.4-P1 批次3b（F314）"
+    },
+    {
+      "id": "extract-insight-via-dialogue",
+      "kind": "spec-section",
+      "status": "replaced",
+      "supersededBy": ["code:src/learning/insight.ts"],
+      "reason": "extract_insight 原定由 DialogueGenerator 产出；实现改为常驻进程在睡眠巩固后单次调用（保持 Learning 零 LLM 判据、插件侧只读）。",
+      "evidence": ["docs/DESIGN.md:1", "src/learning/insight.ts:1"],
+      "since": "F137"
+    },
+    {
+      "id": "archetype-default-strategy",
+      "kind": "spec-section",
+      "status": "removed",
+      "supersededBy": ["code:src/learning/strategy.ts"],
+      "reason": "规格没有 archetype 表；空集回退改为自拟 DEFAULT_BY_CONTEXT + 关键词归一 + 必须在 ACTION_TYPES 里校验（一旦规格补表就换读表）。",
+      "evidence": ["docs/DESIGN.md:1", "src/learning/strategy.ts:32"],
+      "since": "v5.3"
+    },
+    {
+      "id": "persona-9.3-schema",
+      "kind": "schema",
+      "status": "deferred",
+      "supersededBy": ["doc:docs/ARCHITECTURE.md"],
+      "reason": "§9.3 人格卡必填清单与仓库的自由文本 schema 不同构；用户 2026-10-31 决定角色卡机制重构中，定稿前不新增字段、不把新逻辑挂在 parsePersona 上。",
+      "evidence": ["docs/DESIGN.md:1", "docs/ARCHITECTURE.md:1"],
+      "since": "2026-10-31"
+    }
+  ]
+}

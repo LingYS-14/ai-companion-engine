@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "name": "深夜她想找人说话",
+      "frame": {
+        "at": "2026-10-31T03:20:00.000Z",
+        "channel": "qq",
+        "participants": [
+          "owner"
+        ],
+        "affordances": [
+          {
+            "tool": "qq.send_text",
+            "risk": 1,
+            "requiresLogin": true,
+            "rateLimited": false
+          },
+          {
+            "tool": "qq.send_image",
+            "risk": 1,
+            "requiresLogin": true,
+            "rateLimited": false
+          }
+        ],
+        "sinceLastContactMin": 240,
+        "activeIntents": [],
+        "budget": {
+          "rph": 8,
+          "peak": false,
+          "quietHours": true
+        },
+        "hardBlocks": [
+          "quiet_hours"
+        ]
+      },
+      "drive": {
+        "energy": 0.6,
+        "integrity": 0.5,
+        "connection": 0.75,
+        "competence": 0.08,
+        "novelty": 0.7,
+        "coherence": 0.2
+      },
+      "candidates": [
+        {
+          "kind": "withdraw",
+          "goal": "想先退开一会儿，缓一缓",
+          "score": 0.54
+        },
+        {
+          "kind": "continue_thread",
+          "goal": "想把「昨天那件事」接上",
+          "score": 0.452
+        },
+        {
+          "kind": "idle",
+          "goal": "什么都不想做，待着",
+          "score": 0.35
+        },
+        {
+          "kind": "reach_out",
+          "goal": "想找用户说句话",
+          "score": 0.343333
+        }
+      ],
+      "accumulator": {
+        "reach_out": 0,
+        "continue_thread": 0,
+        "explore": 0,
+        "create": 0,
+        "repair": 0,
+        "withdraw": 0,
+        "idle": 0
+      },
+      "emitted": [],
+      "intention": {
+        "status": "blocked",
+        "blocked_by": "quiet_hours",
+        "attempts": 1
+      },
+      "attribution": {
+        "target": "self",
+        "agency": 0.598688,
+        "predError": 0.35
+      }
+    },
+    {
+      "name": "白天她想去看/做点东西",
+      "frame": {
+        "at": "2026-10-31T03:20:00.000Z",
+        "channel": "local",
+        "participants": [],
+        "affordances": [
+          {
+            "tool": "bili.read",
+            "risk": 0,
+            "requiresLogin": true,
+            "rateLimited": false
+          },
+          {
+            "tool": "local.file_write",
+            "risk": 1,
+            "requiresLogin": false,
+            "rateLimited": false
+          }
+        ],
+        "sinceLastContactMin": 30,
+        "activeIntents": [],
+        "budget": {
+          "rph": 12,
+          "peak": false,
+          "quietHours": false
+        },
+        "hardBlocks": []
+      },
+      "drive": {
+        "energy": 0.2,
+        "integrity": 0.1,
+        "connection": 0.658333,
+        "competence": 0.18,
+        "novelty": 0.55,
+        "coherence": 0.1
+      },
+      "candidates": [
+        {
+          "kind": "explore",
+          "goal": "想看看新东西",
+          "score": 1.338
+        },
+        {
+          "kind": "idle",
+          "goal": "什么都不想做，待着",
+          "score": 0.35
+        }
+      ],
+      "accumulator": {
+        "reach_out": 0,
+        "continue_thread": 0,
+        "explore": 0,
+        "create": 0,
+        "repair": 0,
+        "withdraw": 0,
+        "idle": 0
+      },
+      "emitted": [],
+      "intention": {
+        "status": "pending",
+        "blocked_by": null,
+        "attempts": 1
+      },
+      "attribution": {
+        "target": "unclear",
+        "agency": 0.519989,
+        "predError": 0.1
+      }
+    },
+    {
+      "name": "静默时段 + 单写者冲突 + 没额度",
+      "frame": {
+        "at": "2026-10-31T03:20:00.000Z",
+        "channel": "none",
+        "participants": [],
+        "affordances": [],
+        "sinceLastContactMin": 720,
+        "activeIntents": [],
+        "budget": {
+          "rph": 0,
+          "peak": false,
+          "quietHours": true
+        },
+        "hardBlocks": [
+          "quiet_hours",
+          "single_writer_conflict",
+          "rate_limited",
+          "no_affordance"
+        ]
+      },
+      "drive": {
+        "energy": 0.8,
+        "integrity": 0.9,
+        "connection": 1,
+        "competence": 0.76,
+        "novelty": 0.9,
+        "coherence": 0.5
+      },
+      "candidates": [
+        {
+          "kind": "withdraw",
+          "goal": "想先退开一会儿，缓一缓",
+          "score": 0.675
+        },
+        {
+          "kind": "idle",
+          "goal": "什么都不想做，待着",
+          "score": 0.35
+        }
+      ],
+      "accumulator": {
+        "reach_out": 0,
+        "continue_thread": 0,
+        "explore": 0,
+        "create": 0,
+        "repair": 0,
+        "withdraw": 0,
+        "idle": 0
+      },
+      "emitted": [],
+      "intention": {
+        "status": "blocked",
+        "blocked_by": "quiet_hours",
+        "attempts": 1
+      },
+      "attribution": {
+        "target": "world",
+        "agency": 0.210818,
+        "predError": 0.9
+      }
+    }
+  ]
+}

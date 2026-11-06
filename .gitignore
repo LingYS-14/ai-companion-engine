@@ -1,0 +1,14 @@
+node_modules/
+dist/
+data/
+.tmp/
+.tmp-probe/
+.pydeps/
+.pylibs/
+*.log
+*.tsbuildinfo
+coverage/
+.npm-cache/
+
+*.bak-*
+.tmp-probe/

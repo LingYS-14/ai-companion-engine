@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-companion-engine/spec/schema/state.schema.json",
+  "title": "S 层状态（v5.3.1 §4.1 + §9.3 初值表 13 项 + §8.2 taint_map）",
+  "specVersion": "v5.3.1",
+  "patch": "v5.2-patch-v3",
+  "description": "S 层的唯一权威结构。12 个字段：§4.1 声明的 11 项 + §8.2 新增的 taint_map。所有写入必须经过 §4.5 tick 或 §4.2 apply_*（单一写入点，见 Pv3-1）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "valence",
+    "arousal",
+    "pressure",
+    "energy",
+    "dissonance",
+    "entropy",
+    "affection",
+    "trust",
+    "jealousy",
+    "mask_integrity",
+    "suppression_load",
+    "rumination",
+    "taint_map"
+  ],
+  "properties": {
+    "valence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "x-spec-ref": "§4.1 / §9.3",
+      "x-writer": "§4.2 apply_signal_delta（EMA，eta=0.3）",
+      "description": "情绪效价。信号类量：目标值 0.5+0.5(joy−anger−sadness−fear)，按 EMA 逼近，不累加。"
+    },
+    "arousal": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.3,
+      "x-spec-ref": "§4.1 / §9.3",
+      "x-writer": "§4.2 apply_signal_delta（EMA）",
+      "description": "唤醒度。目标值 = max(anger, fear, joy, shame, surprise)。"
+    },
+    "pressure": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.2,
+      "x-spec-ref": "§4.1 / §4.5 / §9.3",
+      "x-writer": "§4.5 tick（唯一）：relax_dt → +gain",
+      "description": "压力。p* = pressure_baseline + gain/kappa_pressure（dt 感知松弛；Pv3-2）。"
+    },
+    "energy": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0,
+      "x-spec-ref": "§4.1 / §4.5 / §9.3",
+      "x-writer": "§4.5 tick：+rate·dt·(1−si) − cost·si",
+      "description": "精力。抑制期不回血（门控），因此 LAZY 在 40 轮而不是 49 轮达成（Pv3-4）。"
+    },
+    "dissonance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.1,
+      "x-spec-ref": "§4.1 / §9.3",
+      "x-writer": "§4.2 apply_load_delta（泄漏 λ=0.05）",
+      "description": "认知失调。载荷类量：稳态 = gain/λ。"
+    },
+    "entropy": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.2,
+      "x-spec-ref": "§4.1 / §9.3",
+      "x-writer": "§4.2 apply_load_delta",
+      "description": "混乱度。shame=surprise=1 时稳态 0.80 → OBSESSION 可达。"
+    },
+    "affection": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.3,
+      "x-spec-ref": "§4.1 / §4.2 / §9.3",
+      "x-writer": "§4.2 update_affection（仅 relation_sources）",
+      "description": "好感。只有 player / qq_contact_verified 来源能改（RELATION_SOURCES 门控）。"
+    },
+    "trust": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.2,
+      "x-spec-ref": "§4.1 / §4.4 / §9.3",
+      "x-writer": "§4.4 非对称更新（+0.5/−2.5 量级）",
+      "description": "信任。负性事件的影响应为正性事件数倍（负性非对称）。"
+    },
+    "jealousy": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.0,
+      "x-spec-ref": "§4.1 / §4.2 / §9.3",
+      "x-writer": "§4.2 apply_load_delta（gain 0.040）",
+      "description": "嫉妒。恢复速率旋钮 jealousy_recovery 在注册表里仍是无单位值 9999（等于永不恢复），需复核。"
+    },
+    "mask_integrity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0,
+      "x-spec-ref": "§4.1 / §4.7 / §9.3",
+      "x-writer": "派生：1 − suppression_load / mask_leak_threshold",
+      "description": "面具完整度。派生量，不是独立自由度；BREAK 判据 mask_integrity < 0.35。"
+    },
+    "suppression_load": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.1,
+      "x-spec-ref": "§4.1 / §4.5 / §4.7 / §9.3",
+      "x-writer": "§4.5 tick（唯一）：relax_dt → +0.15·si",
+      "description": "压抑负荷。s* = 0.1 + 0.15·si/0.2 = 0.85（只允许一条衰减路径，Pv3-10 / INV-7）。"
+    },
+    "rumination": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.0,
+      "x-spec-ref": "§4.1 / §4.5 / §9.3",
+      "x-writer": "§4.5 tick（唯一）：exp(-RUMINATION_LAMBDA·dt) 衰减 → +rumination_add",
+      "description": "反刍载荷。零基线（唯一衰减路径是乘法衰减，不受 INV-7 约束）。"
+    },
+    "taint_map": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "state",
+          "since",
+          "sources"
+        ],
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "trusted",
+              "tainted"
+            ]
+          },
+          "since": {
+            "type": "number",
+            "description": "污染起点的 epoch 秒；必须由 Clock 提供（P1-3）"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "导致污染的来源；与 UNTRUSTED_SOURCES 比对"
+          }
+        },
+        "additionalProperties": false
+      },
+      "x-spec-ref": "§8.2 / §9.3（v5.2 新增；§9.3 原表 11 项漏了它，Pv3-9）",
+      "x-writer": "§8.2 should_clear_taint（2a-2d）",
+      "description": "per-variable 污点标记。可清；记忆层的 retrieved_under_taint 永不清（两层拆分，块 3）。"
+    }
+  },
+  "x-undeclared": {
+    "boredom": {
+      "usedIn": "§10.2 curiosity: `if state.boredom > 0.6`",
+      "specStatus": "undeclared",
+      "note": "v5.2 D.1 自认未声明，但仍留在公式里。实现时必须二选一：补声明（含初值/写入点/范围）或从 curiosity 移除该分支。"
+    },
+    "rumination": {
+      "usedIn": "§7.3 `state.rumination += 0.2`",
+      "specStatus": "undeclared",
+      "note": "v5.2 的 D.1 遗留清单里没有列它——这是审计新发现的第二处未声明状态量。"
+    },
+    "attachment": {
+      "usedIn": "§10.2 `if state.pressure > 0.5 or state.attachment.anxiety > 0.6`",
+      "kind": "layer-violation",
+      "note": "attachment 属于人格层（§9.3 填充清单），不在 S 层。写成 state.attachment 会让 S 层 schema（additionalProperties:false）直接校验失败；应改为读 persona.attachment.anxiety。"
+    },
+    "encode_state": {
+      "usedIn": "§6.6 rerank `state_dependent_match(state.encode_state, m.encode_state)`",
+      "kind": "layer-violation",
+      "note": "encode_state 是**记忆条目**上的字段（保编码时状态快照），不是 S 层字段。第一个参数应是当前状态快照（如 state.snapshot()），不是 state.encode_state。"
+    }
+  },
+  "x-invariants": [
+    "INV-7：带 baseline 的量（pressure / suppression_load）每 tick 只允许一条衰减路径；不得再乘 exp(-λ·dt) 或 (1-δ)。",
+    "单一写入点：apply_* 只返回增量，state 的写入只发生在 §4.5 tick（Pv3-1）。",
+    "mask_integrity 是派生量，不得作为独立状态被写入。"
+  ]
+}

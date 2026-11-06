@@ -1,0 +1,14 @@
+# 统一用 LF，避免 Windows 检出成 CRLF 引发 vite-node/esbuild 语法错误
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.woff binary
+*.woff2 binary
+*.mp3 binary
+*.amr binary
+*.mp4 binary

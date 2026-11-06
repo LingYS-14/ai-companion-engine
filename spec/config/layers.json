@@ -1,0 +1,138 @@
+{
+  "$comment": "三层边界机器化配置（docs/ARCHITECTURE.md Phase 1）。层归属、装配点例外、公共接口前缀都在这里，tools/lint/edges.mjs 不写第二份。改层只改这个文件。装配点 = 有意把各层接到一起的地方：宿主插件的 plugin/{index,runtime,tools}、以及她自己的常驻进程入口 autonomy/{standalone,qq-runner}——后两个是独立进程的装配根（第二形态），不是脊髓逻辑本体。",
+  "srcRoot": "src",
+  "layers": {
+    "brain": [
+      "engine",
+      "memory",
+      "dialogue",
+      "orchestrator",
+      "psychology",
+      "learning",
+      "firewall",
+      "contracts",
+      "maintenance",
+      "trace"
+    ],
+    "spine": [
+      "autonomy",
+      "execution"
+    ],
+    "tools": [
+      "qq",
+      "bili",
+      "desktop",
+      "web",
+      "plugin"
+    ]
+  },
+  "assembly": [
+    "src/plugin/index.ts",
+    "src/plugin/runtime.ts",
+    "src/plugin/tools.ts",
+    "src/autonomy/standalone.ts",
+    "src/autonomy/qq-runner.ts",
+    "scripts/autonomy/main.mjs",
+    "src/assembly/tick-hooks.ts",
+    "src/assembly/main-config.ts",
+    "src/assembly/model-refresh.ts",
+    "src/assembly/say-mode.ts",
+    "src/assembly/lifecycle.ts",
+    "src/assembly/panel-payload.ts",
+    "src/assembly/situation-signals.ts",
+    "src/assembly/write-channel-wiring.ts",
+    "src/assembly/voice-wiring.ts",
+    "src/assembly/qq-wiring.ts",
+    "src/assembly/action-wrapper.ts"
+  ],
+  "brainPublicPrefixes": [
+    "src/ports/"
+  ],
+  "rules": {
+    "R1": {
+      "kind": "forbidden-target-layer",
+      "from": "brain",
+      "to": [
+        "spine",
+        "tools"
+      ],
+      "desc": "大脑层不得 import 脊髓层或工具层（大脑不碰网络、不发消息、不定时）"
+    },
+    "R2": {
+      "kind": "forbidden-target-layer",
+      "from": "spine",
+      "to": [
+        "tools"
+      ],
+      "desc": "脊髓层不得 import 工具层（脊髓只编排动作，不直接摸外部世界）"
+    },
+    "R3": {
+      "kind": "forbidden-target-layer",
+      "from": "tools",
+      "to": [
+        "brain"
+      ],
+      "allowTargetPrefixes": [
+        "brainPublicPrefixes"
+      ],
+      "desc": "工具层不得 import 大脑内部实现（只允许 src/ports/ 下的 Port 公共接口）"
+    },
+    "R4": {
+      "kind": "forbidden-multi-layer",
+      "layers": [
+        "brain",
+        "spine"
+      ],
+      "desc": "只有 assembly 装配点可以同时 import 大脑与脊髓"
+    }
+  },
+  "extraRoots": [
+    "scripts"
+  ],
+  "textRules": [
+    {
+      "id": "R4-text",
+      "title": "装配点不得承载业务：工具定义 / HTTP 服务 / HTML 模板",
+      "patterns": [
+        {
+          "label": "tool-definition",
+          "regex": "ctx\\.tools\\.register\\s*\\("
+        },
+        {
+          "label": "tool-definition",
+          "regex": "\\bname:\\s*\"soul_[a-z_]+"
+        },
+        {
+          "label": "http-server",
+          "regex": "\\bcreateServer\\s*\\("
+        },
+        {
+          "label": "http-response",
+          "regex": "\\bres\\.end\\s*\\("
+        },
+        {
+          "label": "html",
+          "regex": "<!DOCTYPE"
+        }
+      ]
+    },
+    {
+      "id": "R4-business",
+      "title": "装配点不得承载业务判断：大脑判定函数调用（P1-H）",
+      "patterns": [
+        {
+          "label": "outlet-decision",
+          "regex": "\\bchooseIntentOutlet\\s*\\("
+        },
+        {
+          "label": "speakable-selection",
+          "regex": "\\bpickSpeakableIntention\\s*\\("
+        },
+        {
+          "label": "intent-lifecycle",
+          "regex": "\\b(?:newIntention|recordSpokenAttempt|recordHeldAttempt|ensureSpokenRecord)\\s*\\("
+        }
+      ]
+    }
+  ]
+}

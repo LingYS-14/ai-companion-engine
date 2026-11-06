@@ -1,0 +1,42 @@
+{
+  "$comment": "棘轮基线：装配点里已经存在、但还没搬走的业务痕迹（工具定义 / HTTP 服务 / HTML）。只许减不许增；新代码再往装配点里塞这些，`node tools/lint/edges.mjs --update-text-baseline` 会以退出码 2 拒绝。匹配按「规则+文件+标签」，行号仅作记录。",
+  "count": 6,
+  "entries": [
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 998,
+      "target": "intent-lifecycle"
+    },
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 1016,
+      "target": "outlet-decision"
+    },
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 1022,
+      "target": "speakable-selection"
+    },
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 1056,
+      "target": "intent-lifecycle"
+    },
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 1368,
+      "target": "intent-lifecycle"
+    },
+    {
+      "rule": "R4-business",
+      "file": "scripts/autonomy/main.mjs",
+      "line": 1386,
+      "target": "intent-lifecycle"
+    }
+  ]
+}

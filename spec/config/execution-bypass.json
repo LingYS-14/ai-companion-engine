@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "note": "执行层 H1 旁路豁免清单（棘轮）。数字是每个文件里允许出现的直连发送点行数上限；只许减不许增。新增直连会让 npm run execution:check 变红——要么改走 gateway，要么在这里写明理由并加一，评审时一眼可见。",
+  "symbols": [
+    "sendContent",
+    "sendPrivateRecord",
+    "sendPrivateMsg",
+    "extras.sender",
+    "sendPrivateImage"
+  ],
+  "files": [
+    {
+      "file": "src/plugin/index.ts",
+      "max": 6,
+      "reason": "窗口发送适配器、语音 record 发送、makeWindowSender 接线等最后一跳；P1 接线后由 gateway 调用（数量只减不增）。"
+    },
+    {
+      "file": "src/plugin/tools.ts",
+      "max": 2,
+      "reason": "WindowSender 类型签名 + soul_qq_send 的 extras.sender/qq.sendContent 二选一。"
+    },
+    {
+      "file": "src/qq/bridge.ts",
+      "max": 4,
+      "reason": "QQBridge 自己的 sendContent 方法声明/转调与类型引用；窗口桥内部实现。"
+    },
+    {
+      "file": "src/qq/host.ts",
+      "max": 1,
+      "reason": "宿主输入桥的类型引用（窗口发送依赖），非直连调用。"
+    },
+    {
+      "file": "src/qq/onebot.ts",
+      "max": 2,
+      "reason": "sendPrivateRecord/sendPrivateMsg 的定义与类型引用。"
+    }
+  ]
+}

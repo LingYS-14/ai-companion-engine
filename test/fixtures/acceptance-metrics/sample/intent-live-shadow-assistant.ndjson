@@ -1,0 +1,2 @@
+{"at":1793686855000,"localHour":14,"drive":{"energy":0.4},"candidates":[],"emitted":[],"gate":{"allowed":false},"wouldSpeak":false,"outlet":{"target":"idle","kind":null},"narrative":"睡眠中的一拍"}
+{"at":1793687754500,"localHour":14,"drive":{"energy":0.2},"candidates":[],"emitted":[{"kind":"reach_out"}],"gate":{"allowed":true},"wouldSpeak":true,"outlet":{"target":"speak","kind":"reach_out"},"narrative":"醒来前最后一拍"}

@@ -1,0 +1,53 @@
+# AI Companion Engine —— DSH bundle 补丁
+#
+# 形态：Host 插件（在宿主进程内跑，注册 soul_* 工具）。
+# 不含 UI：状态与记忆是工具面能力，表达交给当前会话的模型；
+# 需要在 GUI 里可视化时再单独加 client 半（v5.3 的 §2 没要求 GUI）。
+#
+# config 全部可选：
+#   characterId  角色 id（状态文件名的一部分，可放多个角色）
+#   dataDir      状态 json + 记忆 ndjson 的目录
+#   trace        是否把每轮变动写进宿主日志
+#   displayName  面板/工具里的显示名（纯 UI 标识；F326 起不再有人格卡）
+#   qq           QQ 桥：enabled 总开关 / dryRun 试运行 / peer 只回谁 /
+#                intervalSec 轮询秒 / quietFrom–quietTo 静默时段 / minGapSec / maxPerHour / root
+#                onebot 子段：OneBot v11 通道（HTTP 发 + WebSocket 收），
+#                enabled / baseUrl / wsUrl / token / wsToken / peer（QQ 号）/ dryRun
+
+- insert:
+    - id: ai-companion-engine
+      name: ai-companion-engine
+      config:
+        characterId: assistant
+        dataDir: data
+        trace: true
+        displayName: AI助手
+        qq:
+          enabled: false
+          # 先跑试运行：台词照常生成，但不会真的发到 QQ
+          dryRun: false   # 现在就真的会回；想只看不说改成 true
+          peer: 10000001
+          intervalSec: 15
+          # 她主动开口：状态里真有事（压力/反刍/累/心乱）才说，默认静默 0-7 点、间隔 3 小时、每天最多 3 句
+          # 桥关了就没人送主动开口，避免空转
+          proactive:
+            # 主动开口移交给常驻自主进程（内部言语说出口），
+            # 宿主这边的主动通道关掉——两个嘴同时说话会重复打扰。
+            enabled: false
+            minGapMin: 180
+            maxPerDay: 3
+            checkEveryMin: 5
+          # OneBot v11：与上面的窗口自动化并存、互不依赖。
+          # 先用 dryRun 跑通「收得到、判得对、台词像她」，再让人确认后改 false 真发。
+          # 自检通过后开启 QQ 桥做功能/效果测试
+          onebot:
+            enabled: true
+            # 桥归谁：autonomy = 常驻进程接待（插件只观察、只读）；host = 插件自己起监听
+            owner: autonomy
+            baseUrl: "http://127.0.0.1:3000"
+            wsUrl: "ws://127.0.0.1:3001"
+            token: "REPLACE_WITH_ONEBOT_HTTP_TOKEN"
+            # 这台机器的 WS access_token 与 HTTP token 不是同一个，必须分开填
+            wsToken: "REPLACE_WITH_ONEBOT_WS_TOKEN"
+            peer: 10000001
+            dryRun: false

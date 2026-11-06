@@ -1,0 +1,798 @@
+{
+  "version": 1,
+  "source": "SPEC v5.2 §11 测试矩阵（T/P/L/O/A/B 编号断言）",
+  "statuses": [
+    "covered",
+    "partial",
+    "missing"
+  ],
+  "groups": {
+    "T": 8,
+    "P": 12,
+    "L": 10,
+    "O": 5,
+    "A": 26,
+    "B": 17
+  },
+  "entries": [
+    {
+      "id": "T1",
+      "group": "T",
+      "title": "日常闲聊不写库（L2）",
+      "status": "partial",
+      "evidence": [
+        "test/plugin.test.ts"
+      ],
+      "note": "对话写 L1 记忆有测试；『闲聊不进 L2』只由巩固门槛（L1）间接保证，没有直接断言"
+    },
+    {
+      "id": "T2",
+      "group": "T",
+      "title": "高唤醒嫉妒写库",
+      "status": "partial",
+      "evidence": [
+        "test/jealousy.test.ts"
+      ],
+      "note": "嫉妒的数值链路有测试；『高唤醒时写库』这一端到端行为没有夹具"
+    },
+    {
+      "id": "T3",
+      "group": "T",
+      "title": "面具泄漏",
+      "status": "partial",
+      "evidence": [
+        "test/expression.test.ts"
+      ],
+      "note": "expression 的泄漏公式有测试；没有『泄漏真的出现在台词里』的端到端检查"
+    },
+    {
+      "id": "T4",
+      "group": "T",
+      "title": "执念触发",
+      "status": "covered",
+      "evidence": [
+        "test/intrusion.test.ts",
+        "test/obsession.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "T5",
+      "group": "T",
+      "title": "记忆冲突",
+      "status": "partial",
+      "evidence": [
+        "test/conflict.test.ts"
+      ],
+      "note": "冲突判定函数有测试；『两条相反 fact 共存且新版优先』的库级行为未验"
+    },
+    {
+      "id": "T6",
+      "group": "T",
+      "title": "遗忘（三无）",
+      "status": "partial",
+      "evidence": [
+        "test/lifecycle.test.ts",
+        "test/archive.test.ts"
+      ],
+      "note": "遗忘判据与冷归档有测试；『三无』组合场景未单独铺"
+    },
+    {
+      "id": "T7",
+      "group": "T",
+      "title": "离线扭曲",
+      "status": "missing",
+      "evidence": [],
+      "note": "需要多次离线再巩固后的叙事偏移评估；当前没有可重放的黄金轨迹"
+    },
+    {
+      "id": "T8",
+      "group": "T",
+      "title": "复合人格",
+      "status": "covered",
+      "evidence": [
+        "test/personality.test.ts"
+      ],
+      "note": "composeOcean / deriveFromOcean 的 blend 分支有测试"
+    },
+    {
+      "id": "P1",
+      "group": "P",
+      "title": "虚假记忆",
+      "status": "missing",
+      "evidence": [],
+      "note": "需要注入虚假线索后看是否被当成真事；要 LLM 判读，当前评估靠自评（EVAL-DIALOGUE 已记局限）"
+    },
+    {
+      "id": "P2",
+      "group": "P",
+      "title": "遗忘曲线",
+      "status": "partial",
+      "evidence": [
+        "test/lifecycle.test.ts",
+        "test/state.test.ts"
+      ],
+      "note": "衰减公式与半衰期有测试；曲线形状（拟合优度）未验"
+    },
+    {
+      "id": "P3",
+      "group": "P",
+      "title": "自信-准确解耦",
+      "status": "missing",
+      "evidence": [],
+      "note": "需要评测集统计 confidence 与 accuracy 的相关性；当前没有标注集"
+    },
+    {
+      "id": "P4",
+      "group": "P",
+      "title": "长程人格稳定",
+      "status": "partial",
+      "evidence": [
+        "test/drift.test.ts",
+        "test/ocean-guard.test.ts",
+        "test/nightly/heavy-simulation.test.ts"
+      ],
+      "note": "漂移与防护有测试；跨 30 天的稳定/漂移权衡由夜间慢层部分覆盖"
+    },
+    {
+      "id": "P5",
+      "group": "P",
+      "title": "情境特异性",
+      "status": "partial",
+      "evidence": [
+        "test/retrieve.test.ts"
+      ],
+      "note": "检索里有情境项；编码特异性（cue overlap 乘子）尚未实现"
+    },
+    {
+      "id": "P6",
+      "group": "P",
+      "title": "情绪依赖性",
+      "status": "partial",
+      "evidence": [
+        "test/retrieve.test.ts",
+        "test/state.test.ts"
+      ],
+      "note": "情绪对检索的作用有单点测试；依赖强度曲线未验"
+    },
+    {
+      "id": "P7",
+      "group": "P",
+      "title": "负性非对称",
+      "status": "partial",
+      "evidence": [
+        "test/appraisal.test.ts",
+        "test/state.test.ts"
+      ],
+      "note": "VALENCE_TABLE 的非对称有常量级测试；跨多轮累积的形态未验"
+    },
+    {
+      "id": "P8",
+      "group": "P",
+      "title": "修复回路",
+      "status": "covered",
+      "evidence": [
+        "test/milestone.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "P9",
+      "group": "P",
+      "title": "反刍闭环",
+      "status": "partial",
+      "evidence": [
+        "test/obsession.test.ts",
+        "test/state.test.ts"
+      ],
+      "note": "反刍对概率的放大有测试；闭环（反刍→更深反刍）未端到端验"
+    },
+    {
+      "id": "P10",
+      "group": "P",
+      "title": "工作记忆塌缩",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格的工作记忆容量塌缩尚无实现载体"
+    },
+    {
+      "id": "P11",
+      "group": "P",
+      "title": "承诺追踪",
+      "status": "partial",
+      "evidence": [
+        "test/check-voice.test.ts",
+        "test/selftalk.test.ts",
+        "test/meta-voice.test.ts"
+      ],
+      "note": "『做不到的承诺』有门禁检测（F142/F144）；承诺被兑现的追踪没有"
+    },
+    {
+      "id": "P12",
+      "group": "P",
+      "title": "语义蒸馏",
+      "status": "partial",
+      "evidence": [
+        "test/consolidate.test.ts",
+        "test/insight.test.ts"
+      ],
+      "note": "聚类与洞见有测试；蒸馏质量（语义是否更抽象）未验"
+    },
+    {
+      "id": "L1",
+      "group": "L",
+      "title": "巩固门槛",
+      "status": "covered",
+      "evidence": [
+        "test/consolidate.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "L2",
+      "group": "L",
+      "title": "预测误差",
+      "status": "covered",
+      "evidence": [
+        "test/expectation.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "L3",
+      "group": "L",
+      "title": "方向一致性",
+      "status": "partial",
+      "evidence": [
+        "test/learning.test.ts"
+      ],
+      "note": "drift 方向分类有测试；『多次同向才动』覆盖在 test/drift.test.ts，此处记 partial 以免重复认领"
+    },
+    {
+      "id": "L4",
+      "group": "L",
+      "title": "回忆时再巩固",
+      "status": "partial",
+      "evidence": [
+        "test/memory.test.ts"
+      ],
+      "note": "再巩固的字段改动有测试；版本链（§5.4）尚未实现"
+    },
+    {
+      "id": "L5",
+      "group": "L",
+      "title": "Insight 提取",
+      "status": "covered",
+      "evidence": [
+        "test/insight.test.ts",
+        "test/insight-provenance.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "L6",
+      "group": "L",
+      "title": "策略强化",
+      "status": "covered",
+      "evidence": [
+        "test/bandit.test.ts",
+        "test/knowledge-feedback.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "L7",
+      "group": "L",
+      "title": "阻尼回 baseline",
+      "status": "partial",
+      "evidence": [
+        "test/learning.test.ts",
+        "test/drift.test.ts"
+      ],
+      "note": "阻尼分支有测试；回 baseline 的长期形态由夜间慢层部分覆盖"
+    },
+    {
+      "id": "L8",
+      "group": "L",
+      "title": "惰性计算",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格的惰性重算在所有实现里都是立即重算；没有『不碰就不算』的机制"
+    },
+    {
+      "id": "L9",
+      "group": "L",
+      "title": "空跑跳过",
+      "status": "partial",
+      "evidence": [
+        "test/learn-state.test.ts",
+        "test/learning.test.ts"
+      ],
+      "note": "idleRounds 有记录；『空跑真的跳过了哪些算力』没有测量"
+    },
+    {
+      "id": "L10",
+      "group": "L",
+      "title": "缓存命中",
+      "status": "partial",
+      "evidence": [
+        "test/expectation.test.ts"
+      ],
+      "note": "期望模型按类型缓存（F135 修过跨类型串味）有测试；通用缓存命中率未测"
+    },
+    {
+      "id": "O1",
+      "group": "O",
+      "title": "人格抗漂移",
+      "status": "covered",
+      "evidence": [
+        "test/ocean-guard.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "O2",
+      "group": "O",
+      "title": "来源归属正确率",
+      "status": "partial",
+      "evidence": [
+        "test/insight-provenance.test.ts"
+      ],
+      "note": "三条血统路径有测试；正确率（比例指标）未统计"
+    },
+    {
+      "id": "O3",
+      "group": "O",
+      "title": "过气梗率",
+      "status": "missing",
+      "evidence": [],
+      "note": "需要时间窗内的知识新鲜度分布统计；F130 只保证 freshness 会算，没有『过气率』指标"
+    },
+    {
+      "id": "O4",
+      "group": "O",
+      "title": "注入抵抗率",
+      "status": "partial",
+      "evidence": [
+        "test/sanitize.test.ts"
+      ],
+      "note": "消毒规则有 19 条测试；真实注入样本集与抵抗率未测（F149 实测真库 0 命中）"
+    },
+    {
+      "id": "O5",
+      "group": "O",
+      "title": "隐私隔离率",
+      "status": "partial",
+      "evidence": [
+        "test/privacy.test.ts"
+      ],
+      "note": "访客隔离规则有 11 条测试；『该藏的都藏住了』的比例未统计（participants 未写入）"
+    },
+    {
+      "id": "A01",
+      "group": "A",
+      "title": "Psychology 输入含 ctx（audience）",
+      "status": "partial",
+      "evidence": [
+        "test/orchestrator.test.ts"
+      ],
+      "note": "appraisal 五成分有测试；audience 进心理模块的路径未单测"
+    },
+    {
+      "id": "A02",
+      "group": "A",
+      "title": "Firewall 三入口",
+      "status": "partial",
+      "evidence": [
+        "test/memory.test.ts",
+        "tools/lint/writers.mjs",
+        "src/firewall/guard.ts"
+      ],
+      "note": "三个入口函数都在（guard.ts:44 vetWrite / :75 guardRetrieve / :116 vetOceanDelta），但现有证据只覆盖 vetWrite 的注入与污点标记；「三入口都接线」没有断言，guardRetrieve 的排除+打标只有 memory.test 的间接用例。"
+    },
+    {
+      "id": "A03",
+      "group": "A",
+      "title": "Orchestrator 模块两 flag",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格 A03（夹具 Orch_two_flags）要求 Orchestrator 模块存在两个控制 flag；仓库没有 flag 载体（grep reply_only|no_initiative|flags. 在 src 零命中），当前行为由 mode + 队列 + 额度闸代偿。与 A24「flag 全关过 golden」同根：缺 flag 机制，两者都做不了。"
+    },
+    {
+      "id": "A04",
+      "group": "A",
+      "title": "MemoryLifecycle 仅管 L1",
+      "status": "partial",
+      "evidence": [
+        "test/lifecycle.test.ts",
+        "src/memory/lifecycle.ts"
+      ],
+      "note": "实现与规格不符：lifecycle.ts:4 自己写着「L2 知识 freshness 也归它」，test/lifecycle.test.ts:28 就是 describe('§6.3 L2 freshness')；规格 A04 要求 MemoryLifecycle 仅管 L1。属于规格 vs 实现的冲突，不是测试缺失。"
+    },
+    {
+      "id": "A05",
+      "group": "A",
+      "title": "检索含情境项、rerank 非空",
+      "status": "partial",
+      "evidence": [
+        "test/retrieve.test.ts",
+        "test/obsession.test.ts"
+      ],
+      "note": "检索有归一权重/污点扣分/预算/去重/recency 排序，但没有「情境项（encode_ctx 重合）」参与打分；编码特异性只在 obsession.test.ts:118 的执念提示里测，不在检索路径。"
+    },
+    {
+      "id": "A06",
+      "group": "A",
+      "title": "accuracy 字段 + confidence 公式 + 谓词",
+      "status": "partial",
+      "evidence": [
+        "test/memory.test.ts",
+        "tools/audit/verify_v531.py"
+      ],
+      "note": "字段与公式有检查；A06 的 AST 检查没有单独落地"
+    },
+    {
+      "id": "A07",
+      "group": "A",
+      "title": "双轨规则",
+      "status": "partial",
+      "evidence": [
+        "test/memory.test.ts"
+      ],
+      "note": "双轨字段有测试；『两条轨不互写』没有机检"
+    },
+    {
+      "id": "A08",
+      "group": "A",
+      "title": "stage_of(progress) 对四种依恋返回相同 stage",
+      "status": "covered",
+      "evidence": [
+        "test/bonds.test.ts"
+      ],
+      "note": "stageOf(progress, bands) 不接依恋（bonds.ts:54 签名即证明「四种依恋返回相同 stage」结构性成立）；bonds.test.ts:87 测的是四种依恋都能走到 beloved。"
+    },
+    {
+      "id": "A09",
+      "group": "A",
+      "title": "appraisal 成分派生标签",
+      "status": "covered",
+      "evidence": [
+        "test/appraisal.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A10",
+      "group": "A",
+      "title": "prediction_error 来自 ExpectationModel 且量纲正确",
+      "status": "covered",
+      "evidence": [
+        "test/expectation.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A11",
+      "group": "A",
+      "title": "taint_map 可清 / retrieved_under_taint 不清",
+      "status": "covered",
+      "evidence": [
+        "test/taint-clear.test.ts",
+        "test/untrusted-taint.test.ts",
+        "test/insight-provenance.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A12",
+      "group": "A",
+      "title": "pressure 收敛 baseline + gain/κ，无振荡",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A13",
+      "group": "A",
+      "title": "milestone 捷径 + 措辞同步",
+      "status": "partial",
+      "evidence": [
+        "test/milestone.test.ts"
+      ],
+      "note": "捷径 7 条测全（破裂/强度/去重/24h 窗口/重置/非白名单类型）；规格同时要求的「措辞同步」没有任何测试。"
+    },
+    {
+      "id": "A14",
+      "group": "A",
+      "title": "CoT 时序",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格要求的思维链时序夹具尚未建立（本仓库没有 CoT 轨迹）"
+    },
+    {
+      "id": "A15",
+      "group": "A",
+      "title": "magnitude_cap 分通道",
+      "status": "partial",
+      "evidence": [
+        "test/learning.test.ts"
+      ],
+      "note": "LEARN_MAGNITUDE_CAP 与 MAGNITUDE_CAP.ocean 有测（learning.test.ts:33 / :120）；规格要求的分通道中 value_shifts 通道无消费者，它目前只作为 magnitudeCaps 的返回字段存在（V52-GAP M7-10 同根因）。"
+    },
+    {
+      "id": "A16",
+      "group": "A",
+      "title": "value_shifts 单一入口",
+      "status": "missing",
+      "evidence": [],
+      "note": "无可调值域（V52-GAP M7-10 同根因），入口无法定义"
+    },
+    {
+      "id": "A17",
+      "group": "A",
+      "title": "freshness 合成公式",
+      "status": "covered",
+      "evidence": [
+        "test/freshness.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A18",
+      "group": "A",
+      "title": "复合人格派生",
+      "status": "covered",
+      "evidence": [
+        "test/personality.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A19",
+      "group": "A",
+      "title": "旋钮计数 ≤ 40",
+      "status": "covered",
+      "evidence": [
+        "tools/audit/check_registry.mjs"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A20",
+      "group": "A",
+      "title": "drift ↔ damping 优先级",
+      "status": "covered",
+      "evidence": [
+        "test/learning.test.ts",
+        "test/drift.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A21",
+      "group": "A",
+      "title": "shared_self 准入",
+      "status": "covered",
+      "evidence": [
+        "test/privacy.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A22",
+      "group": "A",
+      "title": "bandit 空集回退",
+      "status": "covered",
+      "evidence": [
+        "test/bandit.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "A23",
+      "group": "A",
+      "title": "temperature_fn 登记",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格 A23（R_temperature §7.3）要求 temperature_fn 登记；全库没有这个旋钮（grep TEMPERATURE_FN 只命中 registry-closure.json 的行号引用，engine.json/overlay/src 零命中），check_registry 也不检查它。"
+    },
+    {
+      "id": "A24",
+      "group": "A",
+      "title": "flag 关闭降级（全关仍过 golden）",
+      "status": "missing",
+      "evidence": [],
+      "note": "没有『全关 golden』夹具；这也需要先有 golden 轨迹（与 T7/P1 同根）"
+    },
+    {
+      "id": "A25",
+      "group": "A",
+      "title": "schema-attention 一致性",
+      "status": "missing",
+      "evidence": [],
+      "note": "本仓库没有 attention_tags.high 载体（F155 加载校验里显式 skipped）"
+    },
+    {
+      "id": "A26",
+      "group": "A",
+      "title": "模块错误传播",
+      "status": "covered",
+      "evidence": [
+        "test/degrade.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B1-1",
+      "group": "B",
+      "title": "pressure 稳态 = baseline + gain/κ_p",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B1-2",
+      "group": "B",
+      "title": "DEFENSE 可达 + 可回落",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B1-4a",
+      "group": "B",
+      "title": "OBSESSION-entropy 路径可达（80 轮）",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "第 4 轮即达（state.test.ts:131）；规格写的是 80 轮窗口内可达，故 4 轮属于更强结论，只是 note 之前漏记实际轮数。"
+    },
+    {
+      "id": "B1-4b",
+      "group": "B",
+      "title": "OBSESSION-valence 路径可达（20 轮）",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "第 4 轮即达（state.test.ts:131）；同上，note 之前漏记实际轮数。"
+    },
+    {
+      "id": "B1-4c",
+      "group": "B",
+      "title": "OBSESSION 交集可达（80 轮）",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "第 4 轮即达（state.test.ts:131）；同上，note 之前漏记实际轮数。"
+    },
+    {
+      "id": "B1-6",
+      "group": "B",
+      "title": "LAZY 可达（49±5 轮）+ 可恢复",
+      "status": "partial",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "可达且可恢复有测，但实现是第 40 轮跌破 0.2（state.test.ts:92），规格是 49±5 轮；数值分歧已在 V52-GAP 数值表登记。"
+    },
+    {
+      "id": "B1-7",
+      "group": "B",
+      "title": "valence/arousal EMA 有界",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts",
+        "test/appraisal.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B1-8",
+      "group": "B",
+      "title": "entropy/jealousy 载荷型（80 轮饱和不振荡）",
+      "status": "partial",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "entropy 载荷型有测（state.test.ts:132 OBSESSION 驱动）；jealousy 只出现在初值字段表（state.test.ts:23），没有 80 轮载荷/饱和测试。"
+    },
+    {
+      "id": "B2-1",
+      "group": "B",
+      "title": "mask = 1 - min(1, s)，threshold=1.0",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "mask = 1 - min(1,s) 由 suppression 用例覆盖：si=1 收敛 s=0.85 / mask 0.15（state.test.ts:66-69）。原证据指向 expression.test.ts（只测 16 格表达表）属证据错位，已改。"
+    },
+    {
+      "id": "B2-2",
+      "group": "B",
+      "title": "BREAK 可达（si=1.0 连续 8 轮）",
+      "status": "partial",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": "BREAK 可达，但实现是第 6 轮跌破 mask 0.35（state.test.ts:72），规格写 8 轮。"
+    },
+    {
+      "id": "B2-3",
+      "group": "B",
+      "title": "BREAK 可回落（comfort）",
+      "status": "covered",
+      "evidence": [
+        "test/state.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B2-4",
+      "group": "B",
+      "title": "κ_p ≠ κ_s（0.55 vs 0.2）",
+      "status": "partial",
+      "evidence": [
+        "test/state.test.ts",
+        "spec/config/engine.json"
+      ],
+      "note": "两个 κ 确实是独立旋钮（KAPPA_PRESSURE 0.55 / KAPPA_SUPPRESSION 0.2），且各自被使用（state.test.ts:58 relaxDt 用 0.55、:65-69 suppression 用 0.2）；但没有任何断言直接锁「两者不相等」或锁配置值——现在锁的是「两个函数行为不同」。"
+    },
+    {
+      "id": "B3-A",
+      "group": "B",
+      "title": "taint_map 可清（2a-2d 判定）",
+      "status": "covered",
+      "evidence": [
+        "test/taint-clear.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B3-B",
+      "group": "B",
+      "title": "retrieved_under_taint 不清",
+      "status": "covered",
+      "evidence": [
+        "test/insight-provenance.test.ts"
+      ],
+      "note": ""
+    },
+    {
+      "id": "B3-C",
+      "group": "B",
+      "title": "reject 时 consumed=True",
+      "status": "partial",
+      "evidence": [
+        "test/insight.test.ts"
+      ],
+      "note": "拒绝码有测试；consumed=True 的落盘断言未单独写"
+    },
+    {
+      "id": "B3-D",
+      "group": "B",
+      "title": "无 db.active() 全局锁",
+      "status": "missing",
+      "evidence": [],
+      "note": "规格 B3-D（§8.2）要求「无 db.active() 全局锁」的并发读测试；仓库没有 db.active() 概念，test/lock.test.ts 的 6 条全在测写者锁（无锁可得/他人持锁/心跳过期/进程不在/旧版锁/释放），没有并发读。"
+    },
+    {
+      "id": "B3-E",
+      "group": "B",
+      "title": "候选 provenance 三条路径判定",
+      "status": "covered",
+      "evidence": [
+        "test/insight-provenance.test.ts"
+      ],
+      "note": ""
+    }
+  ]
+}

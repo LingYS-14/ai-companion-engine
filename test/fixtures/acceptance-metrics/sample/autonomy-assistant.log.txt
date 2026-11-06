@@ -1,0 +1,8 @@
+2026-11-03T06:10:55Z [sleep] phase=asleep pressure=0.00 energy=1.000 window=closed mode=NORMAL reason=hold sleptH=3.59 turns=3
+2026-11-03T06:15:55Z [sleep] phase=asleep pressure=0.00 energy=0.600 window=closed mode=NORMAL reason=hold sleptH=3.68 turns=3
+2026-11-03T06:20:55Z [sleep] phase=asleep pressure=0.00 energy=0.400 window=closed mode=NORMAL reason=hold sleptH=3.76 turns=3
+2026-11-03T06:25:55Z [sleep] phase=asleep pressure=0.00 energy=0.300 window=closed mode=NORMAL reason=hold sleptH=3.84 turns=3
+2026-11-03T06:30:55Z [sleep] phase=asleep pressure=0.00 energy=0.200 window=closed mode=NORMAL reason=hold sleptH=3.93 turns=3
+2026-11-03T06:35:55Z [sleep] phase=waking pressure=0.00 energy=0.198 window=closed mode=NORMAL reason=min-window sleptH=4.01 turns=3
+2026-11-03T09:00:00Z [autonomy] proactive opened=true reason=spoke intent=outlet:speak kind=continue_thread reply=早安呀，今天也要好好吃饭。
+2026-11-03T09:00:00Z [sleep] phase=awake pressure=0.10 energy=0.400 window=closed mode=NORMAL reason=hold sleptH=0.00 turns=2

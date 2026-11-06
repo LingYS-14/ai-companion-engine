@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "source": "src/ports/tool.ts 的 AUTONOMY_TOOL_CATALOG ↔ src/plugin/tools.ts 的 soul_* 工具面",
+  "note": "两边是不同视角：capability 是「常驻进程自己能不能做」，soul_* 是「人可以让它做什么」。这里给出一张显式对照表——凡是不在 capabilities 里的工具，都必须在 hostOnly 里写明为什么它不能作为她的自主能力；两份并集必须等于全部 27 个 soul_* 工具（test/capability-map.test.ts 锁）。",
+  "capabilities": [
+    {
+      "id": "knowledge.read",
+      "soulTools": [
+        "soul_recall",
+        "soul_persona",
+        "soul_state",
+        "soul_stats",
+        "soul_curious",
+        "soul_obsess",
+        "soul_conflict"
+      ]
+    },
+    {
+      "id": "bili.read",
+      "soulTools": [
+        "soul_bili_me",
+        "soul_bili_feed",
+        "soul_bili_learn",
+        "soul_bili_read"
+      ]
+    },
+    {
+      "id": "qq.send_text",
+      "soulTools": [
+        "soul_qq_send",
+        "soul_qq_poll",
+        "soul_qq_proactive"
+      ]
+    },
+    {
+      "id": "qq.send_image",
+      "soulTools": [
+        "soul_qq_send"
+      ]
+    },
+    {
+      "id": "qq.send_voice",
+      "soulTools": [
+        "soul_qq_send"
+      ]
+    },
+    {
+      "id": "desktop.screen",
+      "soulTools": [
+        "soul_desktop"
+      ]
+    },
+    {
+      "id": "desktop.windows",
+      "soulTools": [
+        "soul_desktop"
+      ]
+    }
+  ],
+  "hostOnly": [
+    {
+      "tool": "soul_turn",
+      "why": "推进一回合会改状态；单写者方案下插件只读，写操作必须投递 daemon"
+    },
+    {
+      "tool": "soul_remember",
+      "why": "显式写记忆＝写路径，只允许她自己的进程/受控窗口执行"
+    },
+    {
+      "tool": "soul_advance",
+      "why": "状态推进是常驻进程的每拍动作，不是人能替她按的快进键"
+    },
+    {
+      "tool": "soul_consolidate",
+      "why": "睡眠巩固会写 L2 知识并触发漂移，必须由她的进程在合适时机执行"
+    },
+    {
+      "tool": "soul_insight",
+      "why": "洞见写入是知识写路径，且要先过 firewall/血统校验"
+    },
+    {
+      "tool": "soul_archive",
+      "why": "记忆分层读写冷档，属维护写操作"
+    },
+    {
+      "tool": "soul_reset",
+      "why": "破坏性状态重置，只能由用户在终端确认"
+    },
+    {
+      "tool": "soul_qq_status",
+      "why": "诊断只读面（桥状态/额度/游标），不是自主能力"
+    },
+    {
+      "tool": "soul_qq_dbprobe",
+      "why": "研究用只读探针，需宿主进程完整性，常驻进程没有"
+    },
+    {
+      "tool": "soul_qqlab",
+      "why": "研究用脚本执行器，默认关闭，属开发面能力"
+    },
+    {
+      "tool": "soul_web_search",
+      "why": "网页搜索由宿主会话模型显式发起（常驻进程不按拍主动搜网页，避免无界费用与预算被偷跑）；且必须由 daemon 侧持 key/额度账本执行"
+    },
+    {
+      "tool": "soul_web_fetch",
+      "why": "网页抓取同样由宿主会话模型显式发起（只读、不进她的自主循环，也不自动写记忆）；抓取必须由 daemon 侧持凭证/共享抓取额度账本执行"
+    }
+  ]
+}

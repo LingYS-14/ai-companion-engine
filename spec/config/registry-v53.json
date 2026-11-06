@@ -1,0 +1,938 @@
+{
+  "source": "C:\\AI\\_audit\\in\\v531.txt",
+  "total": 93,
+  "hot": 19,
+  "per_archetype": 10,
+  "knobs": [
+    {
+      "name": "DECAY_RATE",
+      "value": "0.7",
+      "unit": "1/小时",
+      "time_basis": "per-hour",
+      "cluster": "A.1a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "DECAY_RATE 0.7 1/小时 per-hour A.1a cold 否"
+    },
+    {
+      "name": "KAPPA_PRESSURE",
+      "value": "0.55",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "KAPPA_PRESSURE 0.55 无量纲 — A.1a warm 否"
+    },
+    {
+      "name": "KAPPA_SUPPRESSION",
+      "value": "0.2",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "KAPPA_SUPPRESSION 0.2 无量纲 — A.1a warm 否"
+    },
+    {
+      "name": "PRESSURE_BASELINE",
+      "value": "0.2",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "PRESSURE_BASELINE 0.2 无量纲 — A.1a warm 否"
+    },
+    {
+      "name": "TICK_BASE_RESET",
+      "value": "0.005",
+      "unit": "无量纲",
+      "time_basis": "per-round",
+      "cluster": "A.1a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "TICK_BASE_RESET 0.005 无量纲 per-round A.1a cold 否"
+    },
+    {
+      "name": "EMA_ETA",
+      "value": "0.3",
+      "unit": "无量纲",
+      "time_basis": "per-round",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "EMA_ETA 0.3 无量纲 per-round A.1b warm 否"
+    },
+    {
+      "name": "LOAD_GAIN_LAMBDA",
+      "value": "0.05",
+      "unit": "1/小时",
+      "time_basis": "per-hour",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "LOAD_GAIN_LAMBDA 0.05 1/小时 per-hour A.1b warm 否"
+    },
+    {
+      "name": "SUPPRESSION_BASELINE",
+      "value": "0.1",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "SUPPRESSION_BASELINE 0.1 无量纲 — A.1b warm 否"
+    },
+    {
+      "name": "ENERGY_RECOVERY_RATE",
+      "value": "1.0",
+      "unit": "1/小时",
+      "time_basis": "per-hour",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "ENERGY_RECOVERY_RATE 1.0 1/小时 per-hour A.1b warm 否"
+    },
+    {
+      "name": "ENERGY_SUPPRESS_COST",
+      "value": "0.02",
+      "unit": "无量纲/轮",
+      "time_basis": "per-round",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "ENERGY_SUPPRESS_COST 0.02 无量纲/轮 per-round A.1b warm 否"
+    },
+    {
+      "name": "RUMINATION_LAMBDA",
+      "value": "0.03",
+      "unit": "1/小时",
+      "time_basis": "per-hour",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RUMINATION_LAMBDA 0.03 1/小时 per-hour A.1b warm 否"
+    },
+    {
+      "name": "TRUST_MAX_STEP",
+      "value": "0.1",
+      "unit": "无量纲",
+      "time_basis": "per-round",
+      "cluster": "A.1b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "TRUST_MAX_STEP 0.1 无量纲 per-round A.1b warm 否"
+    },
+    {
+      "name": "VALENCE_ANCHOR",
+      "value": "0.5",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1b",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "VALENCE_ANCHOR 0.5 无量纲 — A.1b cold 否"
+    },
+    {
+      "name": "AROUSAL_ANCHOR",
+      "value": "0.3",
+      "unit": "无量纲",
+      "time_basis": "—",
+      "cluster": "A.1b",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "AROUSAL_ANCHOR 0.3 无量纲 — A.1b cold 否"
+    },
+    {
+      "name": "RETRIEVAL_AFFECTING_VARS",
+      "value": "[\"jealousy\", \"valence\", \"arousal\", \"entropy\"]",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.2",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "RETRIEVAL_AFFECTING_VARS [\"jealousy\", \"valence\", \"arousal\", \"entropy\"] A.2 cold 否"
+    },
+    {
+      "name": "UNTRUSTED_SOURCES",
+      "value": "{\"web\", \"parasocial\", \"unknown\"}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.2",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "UNTRUSTED_SOURCES {\"web\", \"parasocial\", \"unknown\"} A.2 cold 否"
+    },
+    {
+      "name": "STATE_INIT",
+      "value": "见",
+      "unit": "§9.3",
+      "time_basis": null,
+      "cluster": "A.2",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "STATE_INIT 见 §9.3 A.2 cold 否"
+    },
+    {
+      "name": "ACTION_TYPES",
+      "value": "{\"care\", \"ignore\", \"tease\", \"praise\", \"hurt\", \"promise\"}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.2",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "ACTION_TYPES {\"care\", \"ignore\", \"tease\", \"praise\", \"hurt\", \"promise\"} A.2 cold 否"
+    },
+    {
+      "name": "IMMEDIATE_WHITELIST",
+      "value": "{\"obsession_intrusion\", \"crisis_event\"}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.2",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "IMMEDIATE_WHITELIST {\"obsession_intrusion\", \"crisis_event\"} A.2 cold 否"
+    },
+    {
+      "name": "CONSOLIDATION_THRESHOLD",
+      "value": "5",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "CONSOLIDATION_THRESHOLD 5 无量纲 A.3a-consolidation hot 是"
+    },
+    {
+      "name": "INSIGHT_THRESHOLD",
+      "value": "5",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "INSIGHT_THRESHOLD 5 无量纲 A.3a-consolidation hot 是"
+    },
+    {
+      "name": "KNOWLEDGE_HALFLIFE",
+      "value": "{meme:7, news:3, trend:14, fact:365, lore:9999}",
+      "unit": "天",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "KNOWLEDGE_HALFLIFE {meme:7, news:3, trend:14, fact:365, lore:9999} 天 A.3a-consolidation cold 否"
+    },
+    {
+      "name": "COLD_ARCHIVE_DAYS",
+      "value": "30",
+      "unit": "天",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "COLD_ARCHIVE_DAYS 30 天 A.3a-consolidation warm 否"
+    },
+    {
+      "name": "UNRESOLVED_GAIN",
+      "value": "0.1",
+      "unit": "无量纲/次",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "UNRESOLVED_GAIN 0.1 无量纲/次 A.3a-consolidation warm 否"
+    },
+    {
+      "name": "UNRESOLVED_DECAY",
+      "value": "0.02",
+      "unit": "1/天",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "UNRESOLVED_DECAY 0.02 1/天 A.3a-consolidation warm 否"
+    },
+    {
+      "name": "HARD_DELETE_RETENTION_DAYS",
+      "value": "7",
+      "unit": "天",
+      "time_basis": null,
+      "cluster": "A.3a-consolidation",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "HARD_DELETE_RETENTION_DAYS 7 天 A.3a-consolidation warm 否"
+    },
+    {
+      "name": "MILESTONE_BOND_GAIN",
+      "value": "0.15",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.3a-milestone",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "MILESTONE_BOND_GAIN 0.15 无量纲 A.3a-milestone hot 是"
+    },
+    {
+      "name": "MILESTONE_CAP",
+      "value": "0.2",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.3a-milestone",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "MILESTONE_CAP 0.2 无量纲 A.3a-milestone hot 是"
+    },
+    {
+      "name": "MILESTONE_TRIGGER_THRESHOLD",
+      "value": "0.9",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.3a-milestone",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "MILESTONE_TRIGGER_THRESHOLD 0.9 无量纲 A.3a-milestone warm 否"
+    },
+    {
+      "name": "MILESTONE_ELIGIBLE_TYPES",
+      "value": "{\"comfort\", \"approach\", \"gift\"}",
+      "unit": null,
+      "time_basis": "—",
+      "cluster": "A.3a-milestone",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "MILESTONE_ELIGIBLE_TYPES {\"comfort\", \"approach\", \"gift\"} — A.3a-milestone cold 否"
+    },
+    {
+      "name": "MILESTONE_TYPE_SET",
+      "value": "{\"comfort\", \"approach\"}",
+      "unit": null,
+      "time_basis": "—",
+      "cluster": "A.3a-milestone",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "MILESTONE_TYPE_SET {\"comfort\", \"approach\"} — A.3a-milestone cold 否"
+    },
+    {
+      "name": "ACCURACY_GUARDS",
+      "value": "{high:0.7, confidence:0.9, low:0.3, valence_coupling:0.5}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "ACCURACY_GUARDS {high:0.7, confidence:0.9, low:0.3, valence_coupling:0.5} A.3b warm 否"
+    },
+    {
+      "name": "MEMORY_SUPPRESS_RATE",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "MEMORY_SUPPRESS_RATE 0.5 A.3b warm 否"
+    },
+    {
+      "name": "RECONSOLIDATION_STORAGE_BOOST",
+      "value": "0.02",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RECONSOLIDATION_STORAGE_BOOST 0.02 A.3b warm 否"
+    },
+    {
+      "name": "MEMORY_RECALL_GAIN",
+      "value": "0.1",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "MEMORY_RECALL_GAIN 0.1 A.3b warm 否"
+    },
+    {
+      "name": "HIGH_AROUSAL_DECAY_FACTOR",
+      "value": "0.1",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "HIGH_AROUSAL_DECAY_FACTOR 0.1 A.3b warm 否"
+    },
+    {
+      "name": "HIGH_AROUSAL_THRESHOLD",
+      "value": "0.7",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "HIGH_AROUSAL_THRESHOLD 0.7 A.3b warm 否"
+    },
+    {
+      "name": "FORGET_VIVIDNESS_THRESHOLD",
+      "value": "0.1",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.3b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "FORGET_VIVIDNESS_THRESHOLD 0.1 A.3b warm 否"
+    },
+    {
+      "name": "STAGE_THRESHOLD",
+      "value": "{stranger:[0,0.25), familiar:[0.25,0.55), close:[0.55,0.80), beloved:[0.80,1.01)}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.4",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "STAGE_THRESHOLD {stranger:[0,0.25), familiar:[0.25,0.55), close:[0.55,0.80), beloved:[0.80,1.01)} A.4 cold 否"
+    },
+    {
+      "name": "PACING_TABLE",
+      "value": "{familiar:15, close:40, beloved:80}",
+      "unit": "轮",
+      "time_basis": null,
+      "cluster": "A.4",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "PACING_TABLE {familiar:15, close:40, beloved:80} 轮 A.4 hot 是"
+    },
+    {
+      "name": "PACING_RATE",
+      "value": "{shallow:0.016667, mid:0.012, deep:0.00625}",
+      "unit": "/轮",
+      "time_basis": null,
+      "cluster": "A.4",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "PACING_RATE {shallow:0.016667, mid:0.012, deep:0.00625} /轮 A.4 hot 是"
+    },
+    {
+      "name": "ATTACHMENT_QUADRANT",
+      "value": "见",
+      "unit": "§5.1",
+      "time_basis": null,
+      "cluster": "A.4",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "ATTACHMENT_QUADRANT 见 §5.1 A.4 cold 否"
+    },
+    {
+      "name": "EXPRESSION_TABLE",
+      "value": "{(quadrant, stage) → style}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.4",
+      "hot": "warm",
+      "per_archetype": true,
+      "raw": "EXPRESSION_TABLE {(quadrant, stage) → style} A.4 warm 是"
+    },
+    {
+      "name": "EMOTION_DYNAMICS",
+      "value": "见",
+      "unit": "§4.3",
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "EMOTION_DYNAMICS 见 §4.3 A.5a cold 否"
+    },
+    {
+      "name": "VALENCE_TABLE",
+      "value": "{praise:(+0.3,-1.0), praise_other:(0.0,-0.5), promise_kept:(+0.15,-1.2), ignored:(0.0,-0.6)}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "VALENCE_TABLE {praise:(+0.3,-1.0), praise_other:(0.0,-0.5), promise_kept:(+0.15,-1.2), ignored:(0.0,-0.6)} A.5a cold 否"
+    },
+    {
+      "name": "OUTCOME_REWARD",
+      "value": "{\"安抚\":0.8, \"离开\":-0.5, \"冷战\":-0.5, \"升温\":1.0, \"无视\":-0.2}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "OUTCOME_REWARD {\"安抚\":0.8, \"离开\":-0.5, \"冷战\":-0.5, \"升温\":1.0, \"无视\":-0.2} A.5a cold 否"
+    },
+    {
+      "name": "SIGNAL_SCALE",
+      "value": "0.3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "SIGNAL_SCALE 0.3 A.5a hot 否"
+    },
+    {
+      "name": "LOAD_WEIGHTS",
+      "value": "{entropy_shame:0.1, entropy_surprise:0.05, dissonance:0.15, jealousy:0.2}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "LOAD_WEIGHTS {entropy_shame:0.1, entropy_surprise:0.05, dissonance:0.15, jealousy:0.2} A.5a hot 否"
+    },
+    {
+      "name": "ALPHA_BASE",
+      "value": "0.3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "ALPHA_BASE 0.3 A.5a hot 否"
+    },
+    {
+      "name": "PRESSURE_GAIN_WEIGHTS",
+      "value": "{jealousy:0.5, shame:0.4, fear:0.3}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "PRESSURE_GAIN_WEIGHTS {jealousy:0.5, shame:0.4, fear:0.3} A.5a warm 否"
+    },
+    {
+      "name": "AFFECTION_EVENT_CAP",
+      "value": "{gift:0.03, approach:0.02, comfort:0.02, appraisal_only:0.05}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "AFFECTION_EVENT_CAP {gift:0.03, approach:0.02, comfort:0.02, appraisal_only:0.05} A.5b hot 是"
+    },
+    {
+      "name": "AFFECTION_EVENT_CAP_DEFAULT",
+      "value": "0.02",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "AFFECTION_EVENT_CAP_DEFAULT 0.02 A.5b warm 否"
+    },
+    {
+      "name": "AFFECTION_SCALE",
+      "value": "0.05",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "AFFECTION_SCALE 0.05 A.5b hot 否"
+    },
+    {
+      "name": "TRUST_GAIN_POS",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "TRUST_GAIN_POS 0.5 A.5b hot 否"
+    },
+    {
+      "name": "TRUST_GAIN_NEG",
+      "value": "-2.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "TRUST_GAIN_NEG -2.5 A.5b hot 否"
+    },
+    {
+      "name": "TRUST_TRIGGER_THRESHOLD",
+      "value": "0.3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "TRUST_TRIGGER_THRESHOLD 0.3 A.5b hot 否"
+    },
+    {
+      "name": "RUMINATION_PROB_WEIGHT",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RUMINATION_PROB_WEIGHT 0.5 A.5b warm 否"
+    },
+    {
+      "name": "DEDUP_PENALTY",
+      "value": "0.3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5c",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "DEDUP_PENALTY 0.3 A.5c warm 否"
+    },
+    {
+      "name": "OBSESSION_PROB_BASE",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5c",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "OBSESSION_PROB_BASE 0.5 A.5c warm 否"
+    },
+    {
+      "name": "OBSESSION_PROB_THRESHOLD",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5c",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "OBSESSION_PROB_THRESHOLD 0.5 A.5c hot 否"
+    },
+    {
+      "name": "OBSESSION_GAIN_WEIGHT",
+      "value": "0.15",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5c",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "OBSESSION_GAIN_WEIGHT 0.15 A.5c warm 否"
+    },
+    {
+      "name": "OBSESSION_RUMINATION_ADD",
+      "value": "0.2",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.5c",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "OBSESSION_RUMINATION_ADD 0.2 A.5c warm 否"
+    },
+    {
+      "name": "RETRIEVAL_WEIGHTS",
+      "value": "{specificity:0.30, semantic:0.18, vividness:0.22, recency:0.10, emotion:0.10, state_dependent:0.05, access_count:0.05}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.6",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RETRIEVAL_WEIGHTS {specificity:0.30, semantic:0.18, vividness:0.22, recency:0.10, emotion:0.10, state_dependent:0.05, access_count:0.05} A.6 warm 否"
+    },
+    {
+      "name": "RETRIEVAL_PENALTIES",
+      "value": "{suppressed:-0.30, taint:-0.10}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.6",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RETRIEVAL_PENALTIES {suppressed:-0.30, taint:-0.10} A.6 warm 否"
+    },
+    {
+      "name": "CAPACITY_BASE",
+      "value": "5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.6",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "CAPACITY_BASE 5 A.6 hot 否"
+    },
+    {
+      "name": "RETRIEVAL_VIVIDNESS_BOOST",
+      "value": "0.05",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.6",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "RETRIEVAL_VIVIDNESS_BOOST 0.05 A.6 warm 否"
+    },
+    {
+      "name": "DRIFT_EWMA_THRESHOLD",
+      "value": "0.15",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "DRIFT_EWMA_THRESHOLD 0.15 A.7a warm 否"
+    },
+    {
+      "name": "DRIFT_CONSISTENCY_THRESHOLD",
+      "value": "0.7",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "DRIFT_CONSISTENCY_THRESHOLD 0.7 A.7a warm 否"
+    },
+    {
+      "name": "DRIFT_DAMPING_RATE",
+      "value": "0.02",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "DRIFT_DAMPING_RATE 0.02 A.7a warm 否"
+    },
+    {
+      "name": "DRIFT_RATE_WHEN_EVIDENCE",
+      "value": "DRIFT_DAMPING_RATE",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "DRIFT_RATE_WHEN_EVIDENCE DRIFT_DAMPING_RATE A.7a cold 否"
+    },
+    {
+      "name": "MAGNITUDE_CAP",
+      "value": "{value_shifts:0.05, ocean:0.02}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "MAGNITUDE_CAP {value_shifts:0.05, ocean:0.02} A.7a cold 否"
+    },
+    {
+      "name": "MILESTONE_TRUST_GAIN",
+      "value": "3.0",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7a",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "MILESTONE_TRUST_GAIN 3.0 A.7a warm 否"
+    },
+    {
+      "name": "LEARN_EVIDENCE_HALFLIFE",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "LEARN_EVIDENCE_HALFLIFE 0.5 A.7b warm 否"
+    },
+    {
+      "name": "LEARN_BOND_HALFLIFE",
+      "value": "0.5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "LEARN_BOND_HALFLIFE 0.5 A.7b warm 否"
+    },
+    {
+      "name": "LEARN_MAGNITUDE_CAP",
+      "value": "0.05",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "LEARN_MAGNITUDE_CAP 0.05 A.7b warm 否"
+    },
+    {
+      "name": "EXPECTATION_WINDOW",
+      "value": "50",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "EXPECTATION_WINDOW 50 A.7b cold 否"
+    },
+    {
+      "name": "EXPECTATION_PRIOR_INTENSITY",
+      "value": "0.3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "EXPECTATION_PRIOR_INTENSITY 0.3 A.7b warm 否"
+    },
+    {
+      "name": "EXPECTATION_RECALC_INTERVAL",
+      "value": "5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.7b",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "EXPECTATION_RECALC_INTERVAL 5 A.7b cold 否"
+    },
+    {
+      "name": "TRACE_FLUSH_INTERVAL_SEC",
+      "value": "5",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.8",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "TRACE_FLUSH_INTERVAL_SEC 5 A.8 cold 否"
+    },
+    {
+      "name": "TRACE_BUFFER_SIZE",
+      "value": "200",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.8",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "TRACE_BUFFER_SIZE 200 A.8 cold 否"
+    },
+    {
+      "name": "SLEEP_OFFSET_HOURS",
+      "value": "6",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.8",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "SLEEP_OFFSET_HOURS 6 A.8 warm 否"
+    },
+    {
+      "name": "SLEEP_BASE_HOUR",
+      "value": "3",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.8",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "SLEEP_BASE_HOUR 3 A.8 warm 否"
+    },
+    {
+      "name": "MASK_LEAK_THRESHOLD",
+      "value": "1.0",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.9",
+      "hot": "hot",
+      "per_archetype": true,
+      "raw": "MASK_LEAK_THRESHOLD 1.0 A.9 hot 是"
+    },
+    {
+      "name": "SUPPRESS_LOAD_GAIN",
+      "value": "0.15",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.9",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "SUPPRESS_LOAD_GAIN 0.15 A.9 warm 否"
+    },
+    {
+      "name": "MODE_THRESHOLDS",
+      "value": "见",
+      "unit": "§4.6（8",
+      "time_basis": null,
+      "cluster": "A.9",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "MODE_THRESHOLDS 见 §4.6（8 个键） A.9 hot 否"
+    },
+    {
+      "name": "CRISIS_SEVERITY_MIN",
+      "value": "0.8",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.9",
+      "hot": "hot",
+      "per_archetype": false,
+      "raw": "CRISIS_SEVERITY_MIN 0.8 无量纲 A.9 hot 否"
+    },
+    {
+      "name": "CRISIS_SUPPRESSION",
+      "value": "0.5",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.9",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "CRISIS_SUPPRESSION 0.5 无量纲 A.9 warm 否"
+    },
+    {
+      "name": "CURIOSITY_TARGETS",
+      "value": "见",
+      "unit": "§10.2",
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "warm",
+      "per_archetype": true,
+      "raw": "CURIOSITY_TARGETS 见 §10.2 A.10 warm 是"
+    },
+    {
+      "name": "CHEAP_PREFILTER_THRESHOLD",
+      "value": "{relevance:0.3, dedup:0.9}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "CHEAP_PREFILTER_THRESHOLD {relevance:0.3, dedup:0.9} A.10 warm 否"
+    },
+    {
+      "name": "KNOWLEDGE_SOCIAL_FRESHNESS_DELTA",
+      "value": "{ignored:-0.1, engaged:+0.2}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "KNOWLEDGE_SOCIAL_FRESHNESS_DELTA {ignored:-0.1, engaged:+0.2} A.10 warm 否"
+    },
+    {
+      "name": "WORLDVIEW_TRANSLATE_ENABLED",
+      "value": "由",
+      "unit": "CANON_MODE",
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "WORLDVIEW_TRANSLATE_ENABLED 由 CANON_MODE 决定 A.10 cold 否"
+    },
+    {
+      "name": "RELATION_SOURCES",
+      "value": "{\"player\", \"qq_contact_verified\"}",
+      "unit": null,
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "cold",
+      "per_archetype": false,
+      "raw": "RELATION_SOURCES {\"player\", \"qq_contact_verified\"} A.10 cold 否"
+    },
+    {
+      "name": "DRIFT_GUARD_MAX",
+      "value": "0.3",
+      "unit": "无量纲",
+      "time_basis": null,
+      "cluster": "A.10",
+      "hot": "warm",
+      "per_archetype": false,
+      "raw": "DRIFT_GUARD_MAX 0.3 无量纲 A.10 warm 否"
+    }
+  ]
+}

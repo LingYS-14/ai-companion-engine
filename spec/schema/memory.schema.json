@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-companion-engine/spec/schema/memory.schema.json",
+  "title": "L1 episodic 记忆条目（v5.2 §6.2）",
+  "specVersion": "v5.3.1",
+  "patch": "v5.2-patch-v3",
+  "description": "§6.2 声明的 27 个字段。confidence / accuracy 双轨：前者角色可见（自评），后者独立演化（A06）；检索键用原始 content 的向量，注入文本用 distorted_content（A07）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "content",
+    "vividness",
+    "confidence",
+    "accuracy",
+    "source",
+    "source_chain",
+    "state_provenance",
+    "retrieved_under_taint",
+    "created_at",
+    "last_accessed",
+    "access_count",
+    "derivation_chain"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-Za-z_]+$"
+    },
+    "content": {
+      "type": "string",
+      "description": "原始内容（检索键来自它）"
+    },
+    "distorted_content": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "扭曲后的注入文本（A07 双轨：检索键不变）"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "vividness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0,
+      "description": "生动度；< suppress_vividness_threshold 会被压抑"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "x-formula": "m.confidence = 0.3*m.vividness + 0.7*m.confidence",
+      "x-spec-ref": "§6.2 A06",
+      "description": "角色可见的自评置信度。系数 0.7 > 0.5 与同段注释「系数 ≤ 0.5」矛盾（F14）：这个公式的不动点是 vividness，即「越生动越自信」，accuracy 独立下降。"
+    },
+    "accuracy": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0,
+      "x-formula": "m.accuracy = 1.0 - m.distortion",
+      "description": "真实准确度。角色不可见；与 confidence 独立演化，二者的分离度是 A06 要断言的东西（P3_confident_wrong 谓词）。"
+    },
+    "self_relevance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5
+    },
+    "schema_congruence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.7
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "source": {
+      "type": "string",
+      "description": "player / qq_contact_verified / web / parasocial / unknown …"
+    },
+    "source_chain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "x-spec-ref": "§6.2 / §8.2",
+      "description": "来源溯因链（v5.2 保留原名 source_chain；我此前补丁里的 derivation_chain 是分裂出来的第二个字段，已在注册表统一）"
+    },
+    "state_provenance": {
+      "type": "string",
+      "enum": [
+        "trusted",
+        "tainted"
+      ],
+      "default": "trusted"
+    },
+    "retrieved_under_taint": {
+      "type": "boolean",
+      "default": false,
+      "readOnly": true,
+      "x-spec-ref": "§8.2 / §6.2",
+      "description": "是否在污染状态下被检索过。**只读、永不清**；影响 rerank 的 −0.10 弱降权，并作为 derive_insight 的 provenance 判定（A.11 解读 2，但语义写死为「排除 + 打标」：污点记忆不得进入 source_vars）。"
+    },
+    "reconsolidated_under_taint": {
+      "type": "boolean",
+      "default": false
+    },
+    "encode_ctx": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "audience": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "time_of_day": {
+          "type": "string"
+        },
+        "world_flags": {
+          "type": "object"
+        }
+      }
+    },
+    "encode_state": {
+      "type": "object",
+      "properties": {
+        "valence": {
+          "type": "number"
+        },
+        "arousal": {
+          "type": "number"
+        }
+      },
+      "description": "编码时的状态快照，供情绪依赖性打分",
+      "x-note": "§6.2 只快照 valence/arousal，但 §6.3 用 m.arousal_tag 做衰减分支（见 x-undeclared）"
+    },
+    "created_at": {
+      "type": "number"
+    },
+    "last_accessed": {
+      "type": "number"
+    },
+    "access_count": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "distortion": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.0
+    },
+    "is_obsession": {
+      "type": "boolean",
+      "default": false
+    },
+    "unresolved_score": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0.0
+    },
+    "forgotten": {
+      "type": "boolean",
+      "default": false
+    },
+    "suppressed_by_stronger": {
+      "type": "boolean",
+      "default": false
+    },
+    "suppression_strength": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0.0
+    },
+    "derivation_chain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "该记忆由哪些记忆/证据派生（insight 溯源）"
+    }
+  },
+  "x-undeclared": {
+    "arousal_tag": {
+      "usedIn": "§6.3 `lam = decay_rate * (0.1 if m.arousal_tag > 0.7 else 1.0)`",
+      "specStatus": "undeclared",
+      "note": "读不到就是 0，条件恒假 —— 高唤醒记忆的衰减抑制永远不生效。"
+    },
+    "next_auto_recall": {
+      "usedIn": "§6.4 `m.next_auto_recall = now + days(2 ** min(m.access_count, 5))`",
+      "specStatus": "undeclared",
+      "note": "这是写字段，schema 里没有就会在持久化时被丢弃（或写入失败）。"
+    },
+    "taboo_hit": {
+      "usedIn": "§6.6 rerank `+ 0.20*m.taboo_hit`",
+      "specStatus": "undeclared",
+      "note": "读不到就是 0，禁忌加权恒为 0。"
+    },
+    "emb": {
+      "usedIn": "§6.6 `cosine(m.emb, ctx.query_emb)`",
+      "kind": "missing-field",
+      "note": "检索键就是它，但 §6.2 的 27 个字段里没有。可由 content 重新嵌入（不持久化），但 HNSW 索引必须持有；实现时必须显式声明为派生字段。"
+    },
+    "last_access": {
+      "usedIn": "§6.9 `days_since(m.last_access) > 30`",
+      "kind": "naming",
+      "note": "schema 里叫 last_accessed。两个名字指同一字段，冷归档判据会永远读到 undefined → 永不归档。"
+    },
+    "memory_layer": {
+      "usedIn": "§8.2 `m.memory_layer == \"L1_episodic\"`",
+      "kind": "missing-field",
+      "note": "语义分层判据，未在 §6.2 声明。要么给 L1 固定常量，要么做多态类型判别。"
+    },
+    "player": {
+      "usedIn": "§8.2 `m.player.explicit_allow_share == True`",
+      "kind": "entity-ref",
+      "note": "玩家实体引用，不是记忆字段；实现时需从实体表解析，且 explicit_allow_share 属于隐私控制（A11 相关）。"
+    },
+    "age": {
+      "usedIn": "§6.6 `recency_curve(m.age, m.position)`",
+      "kind": "derived",
+      "note": "派生自 created_at；不应作为存储字段。"
+    },
+    "position": {
+      "usedIn": "§6.6 `recency_curve(m.age, m.position)`",
+      "kind": "arg-not-field",
+      "note": "这是「该记忆在检索结果里的名次」，是 rerank 的入参，不是记忆字段。写成 m.position 是笔误。"
+    },
+    "valence": {
+      "usedIn": "§6.2 encode_state 内的子字段",
+      "kind": "subfield",
+      "note": "scan 误报：它是 encode_state.valence，不是记忆顶层字段。"
+    }
+  },
+  "x-invariants": [
+    "retrieved_under_taint 与 reconsolidated_under_taint 都是单调布尔（只能 false→true），任何路径不得清回 false。",
+    "检索键与注入文本分离（A07）：emb(content) 检索，distorted_content 注入。",
+    "confidence 与 accuracy 不得互相赋值（A06 的核心是二者可分离）。"
+  ]
+}

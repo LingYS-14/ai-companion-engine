@@ -1,0 +1,5 @@
+{
+  "$comment": "棘轮基线：这里冻结的是入场时已经存在的跨层 import，只许减不许增。修完违规后用 `node tools/lint/edges.mjs --update-baseline` 重写；若出现新增项，脚本会以退出码 2 拒绝写入。匹配按「规则+文件+目标」，行号仅作记录。",
+  "count": 0,
+  "entries": []
+}

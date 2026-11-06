@@ -1,0 +1,98 @@
+{
+  "name": "ai-companion-engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI Companion Engine —— 一个长期在线的 AI 伙伴内核：长期记忆、自主意图、睡眠节律、QQ 与网页双通道 · DSH 插件",
+  "keywords": [
+    "ai-companion",
+    "agent",
+    "long-term-memory",
+    "autonomy",
+    "dsh-plugin",
+    "deepseek"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-name/ai-companion-engine"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/plugin/index.js",
+  "exports": {
+    ".": "./dist/plugin/index.js",
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "scripts",
+    "cordis.patch.yml",
+    "spec",
+    "locale",
+    "icon.svg"
+  ],
+  "scripts": {
+    "build": "tsc -p .",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "node tools/run-vitest.mjs",
+    "test:fast": "node tools/run-vitest.mjs --exclude \"test/nightly/**\"",
+    "test:nightly": "node tools/run-vitest.mjs test/nightly",
+    "test:watch": "node tools/run-vitest.mjs --watch",
+    "spec:verify": "python tools/audit/verify_v531.py",
+    "spec:lint": "node tools/lint/spec.mjs",
+    "registry:check": "node tools/audit/check_registry.mjs",
+    "lint:writers": "node tools/lint/writers.mjs",
+    "edges:check": "node tools/lint/edges.mjs",
+    "gate": "npm run spec:verify && npm run spec:lint && npm run registry:check && npm run superseded:check && npm run matrix:check && npm run execution:check && npm run voice:check && npm run lint:writers && npm run edges:check && npm run typecheck && npm run test:fast",
+    "report:night": "node tools/report/night-summary.mjs",
+    "report:audit": "node tools/report/audit-knowledge.mjs",
+    "autonomy:dry": "node tools/autonomy/dry-run.mjs",
+    "execution:check": "node tools/audit/check_execution.mjs",
+    "voice:check": "node tools/audit/check-voice.mjs",
+    "superseded:check": "node tools/lint/superseded.mjs",
+    "matrix:check": "node tools/lint/test-matrix.mjs",
+    "intent:shadow": "node tools/intent/shadow.mjs",
+    "intent:metrics": "node tools/intent/metrics.mjs",
+    "intent:ablation": "node tools/intent/ablation.mjs",
+    "intent:dashboard": "node tools/intent/dashboard.mjs",
+    "intent:guardian": "node tools/intent/guardian.mjs",
+    "intent:activity": "node tools/intent/activity.mjs",
+    "intent:intentions": "node tools/intent/intentions.mjs",
+    "intent:presence": "node tools/intent/presence.mjs",
+    "intent:dsh": "node tools/intent/dsh.mjs",
+    "stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autonomy/stop.ps1",
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autonomy/start.ps1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/qrcode": "^1.5.6",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

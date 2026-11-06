@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "why": "审计 B.5 硬事实：desktop 三能力完全绕过执行层（grep 'desktop' src/execution = 0），没有 30s 超时、没有幂等键、没有失败四分类。两种收口方式：补 adapter，或明确登记为「不经执行层」。前者要给 desktop.screen/windows 定义超时/幂等/去重语义，而它们本来就是人侧控制台工具（soul_desktop），不是她的自主动作路径——所以选后者：登记成受监管的例外，并用测试保证「只有 desktop 这一族例外」不会被悄悄扩大。",
+  "exceptions": [
+    {
+      "tool": "desktop.screen",
+      "file": "src/plugin/tools.ts",
+      "marker": "runDesktop(",
+      "reason": "人侧控制台工具（soul_desktop 的只读动作）。她的自主路径不调用桌面工具：常驻进程的 runtime 里 tools/desktop 不存在（不在 publish COPY），declaredAvailability 已诚实标不可用。走执行层要额外定义截图落盘/清理/去重语义，收益低于成本。",
+      "status": "documented-bypass"
+    },
+    {
+      "tool": "desktop.windows",
+      "file": "src/plugin/tools.ts",
+      "marker": "runDesktop(",
+      "reason": "同上，只读列窗口；由 soul_desktop 在人侧触发。",
+      "status": "documented-bypass"
+    }
+  ],
+  "invariants": [
+    "只有 desktop.* 一族允许不经执行层；任何 qq.* / bili.* / knowledge.* 出现直连都必须改走 gateway，不许登记成例外。",
+    "每条例外必须带 reason 与文件内 marker；marker 消失 = 例外不再成立，测试失败。",
+    "新增例外要在评审里明说「为什么不能走 gateway」，不接受「先加一条以后再说」。"
+  ]
+}

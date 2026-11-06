@@ -1,0 +1,156 @@
+{
+  "dead": [
+    "ACTION_TYPES",
+    "BREAK_MODE_THRESHOLD",
+    "CHEAP_PREFILTER_THRESHOLD",
+    "CURIOSITY_TARGETS",
+    "STATE_INIT",
+    "TRACE_BUFFER_SIZE",
+    "TRACE_FLUSH_INTERVAL_SEC",
+    "WORLDVIEW_TRANSLATE_ENABLED"
+  ],
+  "thin": [
+    "AFFECTION_EVENT_CAP",
+    "AFFECTION_EVENT_CAP_DEFAULT",
+    "ATTACHMENT_QUADRANT",
+    "COLD_ARCHIVE_DAYS",
+    "DEDUP_PENALTY",
+    "EXPECTATION_PRIOR_INTENSITY",
+    "EXPECTATION_RECALC_INTERVAL",
+    "EXPECTATION_WINDOW",
+    "FORGET_VIVIDNESS_THRESHOLD",
+    "HIGH_AROUSAL_DECAY_FACTOR",
+    "HIGH_AROUSAL_THRESHOLD",
+    "IMMEDIATE_WHITELIST",
+    "INSIGHT_THRESHOLD",
+    "KNOWLEDGE_SOCIAL_FRESHNESS_DELTA",
+    "LEARN_BOND_HALFLIFE",
+    "LEARN_EVIDENCE_HALFLIFE",
+    "MEMORY_RECALL_GAIN",
+    "MEMORY_SUPPRESS_RATE",
+    "MILESTONE_BOND_GAIN",
+    "MILESTONE_CAP",
+    "MILESTONE_TRUST_GAIN",
+    "OBSESSION_GAIN_WEIGHT",
+    "OBSESSION_PROB_BASE",
+    "OBSESSION_PROB_THRESHOLD",
+    "OBSESSION_RUMINATION_ADD",
+    "OUTCOME_REWARD",
+    "PACING_TABLE",
+    "RECONSOLIDATION_STORAGE_BOOST",
+    "RETRIEVAL_AFFECTING_VARS",
+    "RETRIEVAL_PENALTIES",
+    "RETRIEVAL_VIVIDNESS_BOOST",
+    "SLEEP_BASE_HOUR",
+    "SLEEP_OFFSET_HOURS",
+    "SUPPRESS_LOAD_GAIN",
+    "VALENCE_TABLE"
+  ],
+  "unknown": {
+    "BOND_CURVES": [
+      27
+    ],
+    "UPPER_SNAKE_CASE": [
+      38
+    ],
+    "MODE_THRESHOLDS": [
+      132,
+      467
+    ],
+    "APPRAISAL_WEIGHTS": [
+      133
+    ],
+    "SOURCE_WHITELIST": [
+      136
+    ],
+    "DRIFT_GUARD": [
+      136
+    ],
+    "TAINT_LIFECYCLE": [
+      136
+    ],
+    "TEMPERATURE_FN": [
+      137
+    ],
+    "COT_MODE_FN": [
+      137
+    ],
+    "BREAK_MODE": [
+      468,
+      479
+    ],
+    "DEFENSE_MODE": [
+      469,
+      478
+    ],
+    "OBSESSION_MODE": [
+      470,
+      480
+    ],
+    "LAZY_MODE": [
+      471,
+      481
+    ],
+    "OVERDRIVE_MODE": [
+      472,
+      482
+    ],
+    "SIGNATURE_DRIFT": [
+      610
+    ],
+    "INSIST_WEIGHTS": [
+      811
+    ],
+    "MILD_REMIND": [
+      834
+    ],
+    "RETENTION_DAYS": [
+      847
+    ],
+    "REJECTED_SOURCE": [
+      865,
+      978,
+      1067
+    ],
+    "REJECTED_LAYER": [
+      866,
+      979
+    ],
+    "REJECTED_TAINTED": [
+      867
+    ],
+    "REJECTED_EVIDENCE": [
+      868,
+      981
+    ],
+    "DIALOGUE_PROMPT": [
+      926
+    ],
+    "INSIGHT_PROMPT": [
+      929
+    ],
+    "RELATION_SOURCES": [
+      941
+    ],
+    "REJECTED_TAINTED_STATE": [
+      980
+    ],
+    "REJECTED_MAGNITUDE": [
+      1068
+    ],
+    "REJECTED_DRIFT_GUARD": [
+      1069
+    ],
+    "COUNT_TOTAL": [
+      1324
+    ],
+    "COUNT_PER_ARCHETYPE": [
+      1324,
+      1330
+    ],
+    "COUNT_HOT": [
+      1325,
+      1331
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "why": "审计 P1-7：『要不要开口/要不要回』有四处判定，互不知情、三套阈值，文档只承认一处。这张表不合并它们（合并要动行为），只把每一处是谁、管什么、阈值在哪、最后归谁写清楚，并用测试锁住。",
+  "gates": [
+    {
+      "id": "intent-hard-gate",
+      "file": "src/orchestrator/intent/gate.ts",
+      "role": "owner",
+      "owns": "speak",
+      "decides": "主动开口的四个否决（额度 / 单写者 / 关系信任；静默已降级为情境，不再否决）",
+      "marker": "export function intentHardGate(",
+      "note": "唯一的 speak 归属者。它只说『能不能说』，不说『想不想说』——想不想由候选打分与累积器决定。"
+    },
+    {
+      "id": "plugin-mechanical-gate",
+      "file": "src/plugin/index.ts",
+      "role": "legacy",
+      "owns": null,
+      "decides": "插件旧机械门（最小间隔 180 分钟 / 每日上限 3 条 / 静默 0–7 点）",
+      "marker": "startProactive(",
+      "status": "deleted",
+      "note": "已删除（F271，2026-11-01）：插件不再有定时主动路径，主动开口只在常驻进程的 speak 出口。回归判据反过来：这个 marker 现在必须『找不到』——找得到就说明旧机械门被写回来了。",
+      "deletedAt": "2026-11-01"
+    },
+    {
+      "id": "spine-circuit-breaker",
+      "file": "src/autonomy/spine.ts",
+      "role": "safety",
+      "owns": null,
+      "decides": "通道熔断（连败 3 次冷却 10 分钟；通道挂了就不生成）",
+      "marker": "canSend(at: number): boolean;",
+      "note": "不是『要不要说』，是『通道坏了就别白白烧模型调用』。它与 speak 归属不冲突，但必须可观测（F 系留待：spine 落文件 + 进 health）。"
+    },
+    {
+      "id": "proactive-brakes-fallback",
+      "file": "src/dialogue/proactive.ts",
+      "role": "safety",
+      "owns": null,
+      "decides": "主动开口的温和兜底：最小间隔 30 分钟 / 滚动 24h 上限 10 条（intent-hard-gate 放行后仍须过）",
+      "marker": "minGapMs: 30 * 60_000",
+      "status": "transitional",
+      "note": "用户 2026-11-01 裁决的过渡刹车（3h/3 → 30min/10）：A6 没有被反转——静默仍不作否决（gate.ts 对 quiet_hours 返回 null），这里只管间隔与日上限。P3 睡眠状态机上线后移除 minGap/maxPerDay，由「睡着时不在场」承担节流（DESIGN §2.4/§9）；登记在这里是为了让这个过渡判定有归属、有退役条件，而不是又一扇无名的门。todayCount 是滚动 24h（onebot-bridge.ts:302-303）：发布后首个 24h 会被旧 proactiveAt 全挡，行为基线从第 24h 起算。"
+    },
+    {
+      "id": "qq-reply-filter",
+      "file": "src/qq/filter.ts",
+      "role": "tool-layer",
+      "owns": null,
+      "decides": "『这条消息要不要回』（自己发的回声 / 不是本人 / 重复 / 太旧 / 静默不拦回信）",
+      "marker": "export function decideReply(",
+      "status": "to-move-to-brain",
+      "note": "审计 P1-4/D3：工具层做业务判断，应搬大脑（抽 DecisionPort）。搬之前先在这张表里登记归属，避免又一处分不清。"
+    }
+  ],
+  "ownership": {
+    "speak": "intent-hard-gate",
+    "reply": "qq-reply-filter"
+  },
+  "invariants": [
+    "只有 intent-hard-gate 拥有 speak 决定权；其他门不得单独决定『要不要主动开口』。",
+    "role=legacy 的门只许减少（to-delete 必须先删或降级，不能新增）。",
+    "任何新增的『要不要说/要不要回』判定，必须先在这张表登记，否则测试失败。"
+  ]
+}

@@ -1,0 +1,1255 @@
+{
+ "meta": {
+  "name": "v5.4-P1 overlay",
+  "spec": "v5.4.txt（SPEC-v5.4-P1 TypeScript 版）",
+  "plan": "docs/DESIGN.md §1 裁决表 D1–D14",
+  "note": "只加不覆盖：与 spec/config/engine.json（v5.3.1 附录 A，93 键）合并；键名冲突即 fail-closed。",
+  "created": "2026-10-29"
+ },
+ "knobs": {
+  "ACT_R_DECAY": {
+   "cluster": "A.7a",
+   "valueText": "0.010416666666666666",
+   "value": 0.010416666666666666,
+   "kind": "number",
+   "unit": "per-hour",
+   "timeBase": "per-hour",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    0.5
+   ],
+   "calibration": "D1：= 0.25/天。新建记忆 base_activation 从 0 降到 -1.0 需 96h；被检索一次（+ln2）后约 163h。原规格 0.5/h 会让记忆 2–3.4 小时后全部冷掉（审计 B1）。"
+  },
+  "ACT_R_THRESHOLD_HOT": {
+   "cluster": "A.7a",
+   "valueText": "0",
+   "value": 0,
+   "kind": "number",
+   "unit": "activation",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    -2,
+    0
+   ]
+  },
+  "ACT_R_THRESHOLD_COLD": {
+   "cluster": "A.7a",
+   "valueText": "-1",
+   "value": -1,
+   "kind": "number",
+   "unit": "activation",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    -5,
+    0
+   ]
+  },
+  "SPECIFICITY_RESCUE_THRESHOLD": {
+   "cluster": "A.7a",
+   "valueText": "0.55",
+   "value": 0.55,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "D3：本仓库 specificity 是 F25 自实现的 encode_ctx/标签重合率，0.8 在这套定义下几乎不触发（审计 F4）；0.55 由现网 14 条记忆 + 55 条知识校准。"
+  },
+  "BOND_DRIVE_ZERO": {
+   "cluster": "A.4",
+   "valueText": "0.30",
+   "value": 0.3,
+   "kind": "number",
+   "unit": "无量纲",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "bonds",
+   "readers": [
+    "bonds",
+    "src/engine/bonds.ts"
+   ],
+   "range": [
+    0,
+    0.5
+   ],
+   "calibration": "2026-11-01 规格评审 A2（用户裁决「拆开锚点与零点」）：关系推进门槛 Z=0.30。drive=clamp((valence−Z)/(VALENCE_ANCHOR−Z),−1,1)，锚点 0.5 处 drive=1 → 精确恢复 §5.2 的 15/40/80 轮；valence=0.40 仍 30 轮、0.30 停、<0.30 倒退（半速）。改动面=src/engine/bonds.ts + runtime.ts:984-985 传参 + test/bonds.test.ts 中性期望。Z 必须 < A：range 上界 0.5 与锚点重合，若把 Z 调到 0.5，bondDrive 会每轮抛 RangeError（zero<anchor 校验）。"
+  },
+  "EMOTION_RESCUE_THRESHOLD": {
+   "cluster": "A.7a",
+   "valueText": "0.7",
+   "value": 0.7,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    1
+   ]
+  },
+  "GAMMA_FLOOR": {
+   "cluster": "A.7b",
+   "valueText": "0.0001",
+   "value": 0.0001,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "StateMachine",
+   "readers": [
+    "StateMachine"
+   ],
+   "range": [
+    0,
+    1
+   ]
+  },
+  "EVENT_TYPE_SATURATION_LAMBDA": {
+   "cluster": "A.7b",
+   "valueText": "{gift:0.10, approach:0.15, comfort:0.15, appraisal_only:0.05, default:0.15}",
+   "value": {
+    "gift": 0.1,
+    "approach": 0.15,
+    "comfort": 0.15,
+    "appraisal_only": 0.05,
+    "default": 0.15
+   },
+   "kind": "object",
+   "unit": "per-event",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "StateMachine",
+   "readers": [
+    "StateMachine"
+   ],
+   "calibration": "D7：默认类型第 20 次增量 = 1/(1+0.15×20) = 25%；gift 给得勤所以更早饱和。"
+  },
+  "LOCI_PATH_CAPACITY": {
+   "cluster": "A.7c",
+   "valueText": "32",
+   "value": 32,
+   "kind": "number",
+   "unit": "count",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    1,
+    1024
+   ]
+  },
+  "LOCI_PER_SLOT_CAPACITY": {
+   "cluster": "A.7c",
+   "valueText": "2",
+   "value": 2,
+   "kind": "number",
+   "unit": "count",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    1,
+    16
+   ]
+  },
+  "LOCI_MATCH_BOOST": {
+   "cluster": "A.7c",
+   "valueText": "0.15",
+   "value": 0.15,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    0.5
+   ],
+   "calibration": "D11：乘性、仅对 base_score≥0，不进 RETRIEVAL_WEIGHTS（七键和仍 1.00）。"
+  },
+  "UNRESOLVED_RETRIEVAL_BOOST": {
+   "cluster": "A.7d",
+   "valueText": "0.08",
+   "value": 0.08,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    0.5
+   ]
+  },
+  "MIN_GRAPH_WEIGHT": {
+   "cluster": "A.7d",
+   "valueText": "0.3",
+   "value": 0.3,
+   "kind": "number",
+   "unit": "weight",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "D10：只作用于扩散新增的邻居；种子即使无图边也保留。"
+  },
+  "MAX_CANDIDATE_POOL": {
+   "cluster": "A.7d",
+   "valueText": "500",
+   "value": 500,
+   "kind": "number",
+   "unit": "count",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore"
+   ],
+   "range": [
+    10,
+    5000
+   ]
+  },
+  "CONSOLIDATION_PRIORITY_BOOST": {
+   "cluster": "A.7e",
+   "valueText": "{recency:0.3, schema_gap:0.2}",
+   "value": {
+    "recency": 0.3,
+    "schema_gap": 0.2
+   },
+   "kind": "object",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Orchestrator",
+   "readers": [
+    "Orchestrator"
+   ]
+  },
+  "HUB_SUMMARY_TTL": {
+   "cluster": "A.7e",
+   "valueText": "604800",
+   "value": 604800,
+   "kind": "number",
+   "unit": "seconds",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "MemoryStore",
+   "readers": [
+    "MemoryStore",
+    "Orchestrator"
+   ],
+   "range": [
+    3600,
+    31536000
+   ]
+  },
+  "CURIOSITY_GAP_PEAK": {
+   "cluster": "A.7f",
+   "valueText": "0.3333333333333333",
+   "value": 0.3333333333333333,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "Orchestrator",
+   "readers": [
+    "Orchestrator",
+    "Learning"
+   ],
+   "range": [
+    0.05,
+    0.95
+   ],
+   "calibration": "D13：倒 U 的峰位。公式 m = coping × clamp(gap·(1−gap)² / (p·(1−p)²), 0, 1)，m(0)=m(1)=0、峰在 p≈0.33。原 4·gap·(1−gap) 峰在 0.5，且不引用该常量（审计 N2）。"
+  },
+  "CURIOSITY_TARGET_COUNT": {
+   "cluster": "A.7f",
+   "valueText": "5",
+   "value": 5,
+   "kind": "number",
+   "unit": "count",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Learning",
+   "readers": [
+    "Learning"
+   ],
+   "range": [
+    1,
+    20
+   ]
+  },
+  "PROACTIVE_ENERGY_THRESHOLD": {
+   "cluster": "A.7g",
+   "valueText": "0.5",
+   "value": 0.5,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "Orchestrator",
+   "readers": [
+    "Orchestrator"
+   ],
+   "range": [
+    0,
+    1
+   ]
+  },
+  "PROACTIVE_TRUST_FLOOR": {
+   "cluster": "A.7g",
+   "valueText": "0.3",
+   "value": 0.3,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "Orchestrator",
+   "readers": [
+    "Orchestrator"
+   ],
+   "range": [
+    0,
+    1
+   ]
+  },
+  "TRUST_SAFE_MIN": {
+   "cluster": "A.7g",
+   "valueText": "0.4",
+   "value": 0.4,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "Orchestrator",
+   "readers": [
+    "Orchestrator"
+   ],
+   "range": [
+    0,
+    1
+   ]
+  },
+  "JEALOUSY_BASE_HALF_LIFE_HOURS": {
+   "cluster": "A.7h",
+   "valueText": "720",
+   "value": 720,
+   "kind": "number",
+   "unit": "hours",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "StateMachine",
+   "readers": [
+    "StateMachine"
+   ],
+   "range": [
+    24,
+    8760
+   ],
+   "calibration": "D8：基线半衰期 30 天；JEALOUSY_LOAD_DECAY = ln2 / 该值 ≈ 0.000963/h。实际半衰期 = 基线 / 联动系数 k（见 JEALOUSY_DECAY_MODULATION）。"
+  },
+  "JEALOUSY_DECAY_MODULATION": {
+   "cluster": "A.7h",
+   "valueText": "{trust:0.6, valence:0.4, rumination:-0.8, pressure:-0.5, anxiety:-0.5, floor:0.4, ceil:2.5}",
+   "value": {
+    "trust": 0.6,
+    "valence": 0.4,
+    "rumination": -0.8,
+    "pressure": -0.5,
+    "anxiety": -0.5,
+    "floor": 0.4,
+    "ceil": 2.5
+   },
+   "kind": "object",
+   "unit": "ratio",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "StateMachine",
+   "readers": [
+    "StateMachine"
+   ],
+   "calibration": "D8 修订（用户 2026-10-29 12:52 要求联动）：k = clamp(1 + 0.6·(trust−0.5) + 0.4·(valence−0.5) + 0.8·rumination·(−1) + 0.5·pressure·(−1) + 0.5·anxiety·(−1), 0.4, 2.5)。信任高/心情好 → 消气快；反刍/压着/依恋焦虑 → 消气慢。半衰期区间 12–75 天。"
+  },
+  "EMOTION_DYNAMICS": {
+   "cluster": "A.7h",
+   "valueText": "7 情绪 × {onset, peak, recoveryHours}",
+   "value": {
+    "joy": {
+     "onset": 0.6,
+     "peak": 0.9,
+     "recoveryHours": 6
+    },
+    "sadness": {
+     "onset": 0.3,
+     "peak": 0.6,
+     "recoveryHours": 72
+    },
+    "anger": {
+     "onset": 0.5,
+     "peak": 0.8,
+     "recoveryHours": 12
+    },
+    "fear": {
+     "onset": 0.7,
+     "peak": 0.9,
+     "recoveryHours": 2
+    },
+    "shame": {
+     "onset": 0.4,
+     "peak": 0.7,
+     "recoveryHours": 24
+    },
+    "surprise": {
+     "onset": 0.8,
+     "peak": 0.95,
+     "recoveryHours": 0.5
+    },
+    "jealousy": {
+     "onset": 0.5,
+     "peak": 0.8,
+     "recoveryHours": 720
+    }
+   },
+   "kind": "object",
+   "unit": "mixed",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "StateMachine",
+   "readers": [
+    "StateMachine",
+    "DialogueGenerator"
+   ],
+   "calibration": "onset/peak 是涌现强度归一化因子（0..1）；recoveryHours 是半衰期，只在派生 jealousy 速率时使用，禁止直接进 tick 的指数（A38b-2）。"
+  },
+  "SELFTALK_MAX_SEEDS": {
+   "cluster": "A.10",
+   "valueText": "3",
+   "value": 3,
+   "kind": "number",
+   "unit": "seeds",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    1,
+    5
+   ],
+   "calibration": "一次内部言语最多回指 3 条记忆；再多就从「想起」变成「检索」，不符合走神/复现的形态（§10.1 注意力容量）。"
+  },
+  "SELFTALK_VIVIDNESS_GAIN": {
+   "cluster": "A.10",
+   "valueText": "0.02",
+   "value": 0.02,
+   "kind": "number",
+   "unit": "vividness",
+   "timeBase": "per-event",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "回指式复现给被回忆条目的鲜活度加成；与 §6.2 的日常衰减（每天 0.02）同量级——想一遍约等于抵消一天的淡化，不替代睡眠巩固。"
+  },
+  "SELFTALK_UNRESOLVED_RELIEF": {
+   "cluster": "A.10",
+   "valueText": "0.05",
+   "value": 0.05,
+   "kind": "number",
+   "unit": "score",
+   "timeBase": "per-event",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    0,
+    0.2
+   ],
+   "calibration": "把「没想通」讲一遍会稍微松一点（0.05/次），但不归零：真正放下发生在睡眠巩固与关系事件里。"
+  },
+  "SELFTALK_INTERFERENCE_LOSS": {
+   "cluster": "A.10",
+   "valueText": "0.01",
+   "value": 0.01,
+   "kind": "number",
+   "unit": "vividness",
+   "timeBase": "per-event",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    0,
+    0.05
+   ],
+   "calibration": "方向跑偏的自发思维（语义邻域内但与材料不同向）带来干扰代价：每次掉 0.01 鲜活度；这是文献里「无关走神削弱编码」的最小可测体现。"
+  },
+  "SELFTALK_REWRITE_FACTOR": {
+   "cluster": "A.10",
+   "valueText": "0.2",
+   "value": 0.2,
+   "kind": "number",
+   "unit": "ratio",
+   "timeBase": "per-event",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    0,
+    0.5
+   ],
+   "calibration": "再巩固窗口内的情绪重写：只改情绪底色（valence），不改内容与可信度，且单次位移 ≤0.2。改的是『现在重述的版本』——符合记忆再巩固的结论。"
+  },
+  "SELFTALK_JOURNAL_CAP": {
+   "cluster": "A.10",
+   "valueText": "500",
+   "value": 500,
+   "kind": "number",
+   "unit": "entries",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    100,
+    5000
+   ],
+   "calibration": "内部言语日志保留条数；它同时是睡眠巩固的输入（schema_gap 证据）与「她想过什么」的审计面。"
+  },
+  "SELFTALK_INTERVAL_MS": {
+   "cluster": "A.10",
+   "valueText": "10800000",
+   "value": 10800000,
+   "kind": "number",
+   "unit": "ms",
+   "timeBase": "per-event",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "SelfTalk",
+   "readers": [
+    "SelfTalk"
+   ],
+   "range": [
+    300000,
+    10800000
+   ],
+   "calibration": "自主循环里内部言语的基础间隔（默认 3 小时 = 10800000ms；用户 2026-11-01 裁决，从 30 分钟降频）；实际间隔 = 本值 × 峰谷缩放后夹回 5 分钟–3 小时（峰时非休息日会被夹回 3 小时），频率审核退避再 ×1.6（代码上可达 4.8 小时）——见 docs/OPERATIONS.md。"
+  },
+  "LEARN_VIDEO_QUOTES": {
+   "cluster": "A.11",
+   "valueText": "3",
+   "value": 3,
+   "kind": "number",
+   "unit": "quotes",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "BiliNotes",
+   "readers": [
+    "BiliNotes"
+   ],
+   "range": [
+    1,
+    5
+   ],
+   "calibration": "每条视频引用几句字幕。3 = 开头/中段/结尾各一句；1 会让知识只剩一句俏皮话，5 会挤掉简介与画面摘要。"
+  },
+  "LEARN_SUBTITLE_CHARS": {
+   "cluster": "A.11",
+   "valueText": "400",
+   "value": 400,
+   "kind": "number",
+   "unit": "chars",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "BiliNotes",
+   "readers": [
+    "BiliNotes"
+   ],
+   "range": [
+    0,
+    4000
+   ],
+   "calibration": "字幕全文达到多少字才写「AI 字幕 N 字」。低于 400 字的短视频写数字反而不如不写；400 是 1–2 分钟口播的下限。"
+  },
+  "LEARN_FRAME_SAMPLES": {
+   "cluster": "A.11",
+   "valueText": "3",
+   "value": 3,
+   "kind": "number",
+   "unit": "frames",
+   "timeBase": "none",
+   "heat": "warm",
+   "perArchetype": false,
+   "owner": "BiliNotes",
+   "readers": [
+    "BiliNotes"
+   ],
+   "range": [
+    0,
+    5
+   ],
+   "calibration": "取几处画面取样。3 处能覆盖开头/中段/结尾且只需 1 张拼图；0 = 只学字幕，关掉画面这条腿。"
+  },
+  "LEARN_ENRICH_PER_ROUND": {
+   "cluster": "A.11",
+   "valueText": "1",
+   "value": 1,
+   "kind": "number",
+   "unit": "videos",
+   "timeBase": "per-round",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "BiliNotes",
+   "readers": [
+    "BiliNotes"
+   ],
+   "range": [
+    0,
+    2
+   ],
+   "calibration": "每轮学习最多深读几条（字幕+画面）。1 条 ≈ 2 次 HTTP + 1 次拼图下载 + 3 次 ffmpeg，45 分钟一拍完全够；2 条只在她要补课的那天手动放开。"
+  },
+  "RHYTHM_MIN_INBOUND_SAMPLES": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "30",
+   "value": 30,
+   "unit": "samples",
+   "range": [
+    1,
+    500
+   ],
+   "calibration": "DESIGN-TEMPORALITY-SLEEP-PERSONA v0.2 §2.3 门槛①：入站样本 ≥30 条才允许产出「他的作息」事实。低于 30 条时 hisRhythm=null，处境行只写「我还不了解他的作息」，不拿几天的稀疏样本假装摸清。"
+  },
+  "RHYTHM_MIN_LOCAL_DATES": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "7",
+   "value": 7,
+   "unit": "days",
+   "range": [
+    1,
+    90
+   ],
+   "calibration": "门槛②：覆盖 ≥7 个本地日期——同一晚聊十句不算摸清作息，必须跨过一周的观察。按 tzOffsetMinutes=480 的本地日期计（rhythm.ts 走 localPartsAt 纯算术）。"
+  },
+  "RHYTHM_MIN_WORKDAY_DATES": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "3",
+   "value": 3,
+   "unit": "days",
+   "range": [
+    0,
+    30
+   ],
+   "calibration": "门槛③：工作日覆盖的不同本地日期 ≥3 天（DESIGN:128「各自 ≥3 天」按日期数，不按样本条数——同一晚聊十句只算 1 天）。日历覆盖优先于周末判定（data/workdays.txt 调休优先，其次 data/holidays.txt 节假日）。不足时返回 null，交上层如实说不知道。"
+  },
+  "RHYTHM_MIN_RESTDAY_DATES": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "3",
+   "value": 3,
+   "unit": "days",
+   "range": [
+    0,
+    30
+   ],
+   "calibration": "门槛④：休息日覆盖的不同本地日期 ≥3 天。与工作日门槛成对：只见过他上班时间的出现不算节律，得两头都有至少 3 天的观察。"
+  },
+  "RHYTHM_CONFIDENCE_LOW_CAP": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "0.45",
+   "value": 0.45,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "DESIGN §2.3 字面：30≤n<100 时 confidence=min(lowCap, floor+n*slope)。因 floor 0.6 > lowCap 0.45，本档实际恒为 0.45；按 DESIGN:134 该档必须在处境行标注「样本少」，由 situation-note 的 rhythmLine 在 sampleCount<100 时追加「（样本还少，先当参考）」。n<30 根本不产出 fact（buildHisRhythm 返回 null）。"
+  },
+  "RHYTHM_CONFIDENCE_HIGH_FLOOR": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "0.6",
+   "value": 0.6,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "DESIGN §2.3 字面：n≥100 时 confidence=floor+n*slope，本值即 floor=0.6。注意 100 处会从 0.45 直接跳到 min(0.85, 0.6+100×0.0025)=0.85——这是规格字面（B4 裁决照抄，不做平滑），测试锁住跳变。"
+  },
+  "RHYTHM_CONFIDENCE_HIGH_SLOPE": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "0.0025",
+   "value": 0.0025,
+   "unit": "per-sample",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "DESIGN §2.3 字面：n≥100 时 confidence=floor+n*slope，其中 slope=1/400=0.0025。注意因 HIGH_FLOOR=0.6，n=100 时 raw=0.6+0.25=0.85 已顶到 highCap，故当前配置下 n≥100 恒为 0.85——斜率只在 HIGH_FLOOR 被调低（<0.6）时才影响输出；若想平滑增长，必须改 DESIGN 另走评审。"
+  },
+  "RHYTHM_CONFIDENCE_HIGH_CAP": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "Rhythm",
+   "readers": [
+    "Rhythm",
+    "src/orchestrator/intent/rhythm.ts"
+   ],
+   "cluster": "A.12",
+   "valueText": "0.85",
+   "value": 0.85,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "DESIGN §2.3 字面：confidence 上限 0.85——即使样本再多，作息也只是统计推断（可被反例推翻），不给满分。该值只由 rhythmConfidence 消费，rhythm.ts 是唯一读点。"
+  },
+  "ENERGY_WAKE_COST": {
+   "kind": "number",
+   "timeBase": "per-hour",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "1.04",
+   "value": 1.04,
+   "unit": "energy/h",
+   "range": [
+    0,
+    2
+   ],
+   "calibration": "P3 §2.3 修订（2026-11-02 用户裁决 C，把节奏调准）：毛值 1.04/h，净耗 0.04/h（恢复 1.0/h − 清醒 1.04/h），比旧值 1.03125 每晚多耗约 0.14 energy。注意：0.40 是睡眠窗（本地 03:00–12:00）内的入困参考线（pressure>0.6），不是 phase 阈值；窗外入困线是 pressure>0.75（energy<0.25），入睡需 pressure>0.8（energy<0.2）且静默 20 分钟。按 08:00 醒、净耗 0.04/h 粗算：约 02:45 到 energy 0.25 入困、04:00 左右 asleep、最短窗 08:00 醒（未实测，S2 校准后再定稿）。旧值 1.03125 是「16h 恰半电」的算术解（净耗 0.03125/h）。设 0 即软关闭 A：净变化回到恢复项 +rate·dt；恒 1.0 只是净耗 0 的中间态，不是关闭开关。"
+  },
+  "ENERGY_COST_TURN": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.0156",
+   "value": 0.0156,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3 §2.3 B 通道：一轮对话（turn）的认知耗能。0.0156 使 10 轮对话 ≈0.156，接近一次慢充小时的电量；range 上限 0.1 保证单次不会直接压到 LAZY。"
+  },
+  "ENERGY_COST_LEARN": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.003",
+   "value": 0.003,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3 §2.3 B 通道：一次学习（learn）的认知耗能，比对话轻（她看/记为主，输出少）。"
+  },
+  "ENERGY_COST_PROACTIVE": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.004",
+   "value": 0.004,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3 §2.3 B 通道：一次主动开口（proactive）的认知耗能——整理念头并组织一句话。"
+  },
+  "ENERGY_COST_SELFTALK": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.002",
+   "value": 0.002,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3 §2.3 B 通道：一次内部言语（selftalk）的认知耗能，最轻——独处时的自语几乎不费力。"
+  },
+  "ENERGY_COST_CONSOLIDATE": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.005",
+   "value": 0.005,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3 §2.3 B 通道：一次记忆巩固（consolidate）的认知耗能——睡点巩固发生在睡着时，由睡眠预算覆盖，不重复扣；此类事件只在零星手动补算时计入。"
+  },
+  "SLEEP_MIN_WINDOW_HOURS": {
+   "kind": "number",
+   "timeBase": "—",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "sleep",
+   "readers": [
+    "sleep",
+    "src/engine/sleep.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "4.0",
+   "value": 4,
+   "unit": "h",
+   "range": [
+    0,
+    12
+   ],
+   "calibration": "P3 §4.3：最短睡眠窗 4h——自然唤醒必须睡满此窗且 energy≥0.65；对方消息可越过此窗直接进 waking。"
+  },
+  "SLEEP_WAKE_ENERGY": {
+   "kind": "number",
+   "timeBase": "—",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "sleep",
+   "readers": [
+    "sleep",
+    "src/engine/sleep.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.65",
+   "value": 0.65,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "P3 §4.3：自然唤醒的能量线 0.65（对应 sleepPressure=0.35，两者是同一条件的两种写法，不是独立分支）。"
+  },
+  "SLEEP_MAX_WINDOW_HOURS": {
+   "kind": "number",
+   "timeBase": "—",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "sleep",
+   "readers": [
+    "sleep",
+    "src/engine/sleep.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "9.0",
+   "value": 9,
+   "unit": "h",
+   "range": [
+    1,
+    12
+   ],
+   "calibration": "P3 §4.3：最长睡眠 9h 兜底（再睡也睡不出更多恢复），同时充当睡眠窗长度——不另设窗口结束常量。"
+  },
+  "ENERGY_COST_LEARN_DEEP": {
+   "kind": "number",
+   "timeBase": "per-event",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "energy",
+   "readers": [
+    "energy",
+    "src/engine/state.ts",
+    "src/plugin/runtime.ts"
+   ],
+   "cluster": "A.13",
+   "valueText": "0.006",
+   "value": 0.006,
+   "unit": "energy/次",
+   "range": [
+    0,
+    0.1
+   ],
+   "calibration": "P3-3 §3.5：深读一批视频笔记的额外认知成本（补字幕/画面、可复盘）。45 分钟一轮 ≈0.19/天，与 A 的 0.5/天同级；设 0 = 只关深读耗能。"
+  },
+  "WEB_SEARCH_ENABLED": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/config.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "1",
+   "value": 1,
+   "unit": "switch",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：总开关。0 = 关闭、零网络零行为变化（kill switch）；2026-11-01 用户批准 W2 观察期开启 = 1（只开 learning 搜索/抓取，无工具面；每日 20 次搜索 / 10 次抓取、30 分钟最小间隔、8s 超时；监察 [web] 日志与 data/web-usage-*.json）。"
+  },
+  "WEB_SEARCH_DAILY_CAP": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/config.ts",
+    "src/web/budget.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "20",
+   "value": 20,
+   "unit": "次/日",
+   "range": [
+    0,
+    100
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：每日搜索成功次数上限 20（$0.75/千次 ≈0.015 元/日，加上抓取约 4.5–5 元/月）。设 0 = 关搜索但保留抓取。"
+  },
+  "WEB_FETCH_DAILY_CAP": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/config.ts",
+    "src/web/budget.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "10",
+   "value": 10,
+   "unit": "次/日",
+   "range": [
+    0,
+    50
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：每日抓取成功次数上限 10；W1 不执行抓取，只保留额度口径给 W3。"
+  },
+  "WEB_SEARCH_MIN_INTERVAL_MS": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/config.ts",
+    "src/web/budget.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "1800000",
+   "value": 1800000,
+   "unit": "ms",
+   "range": [
+    0,
+    21600000
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：两次搜索的最小间隔 30 分钟——学习循环本身 45 分钟一次，这个值只是防抖与失败风暴，不是主要限流。"
+  },
+  "WEB_TIMEOUT_MS": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/config.ts",
+    "src/web/search.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "8000",
+   "value": 8000,
+   "unit": "ms",
+   "range": [
+    1000,
+    30000
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：单次 HTTP 超时 8s。模型调用是 45s，但搜索是学习拍里的旁路，不能把学习拍拖长；超时即失败、不重试。"
+  },
+  "WEB_SOURCE_CREDIBILITY": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "web",
+   "readers": [
+    "web",
+    "src/web/ingest.ts",
+    "src/web/config.ts"
+   ],
+   "cluster": "A.14",
+   "valueText": "0.55",
+   "value": 0.55,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "W1（spec v2.3 §7.2）：落库 knowledge 的 source_credibility。低于 bili 的 0.7——公开网页没有平台审核；但没有低到不可用（0.55 > 0.5 的可信线）。"
+  },
+  "ECHO_DICE_THRESHOLD": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "hot",
+   "perArchetype": false,
+   "owner": "echo",
+   "readers": [
+    "echo",
+    "src/maintenance/echo-policy.ts"
+   ],
+   "cluster": "A.15",
+   "valueText": "0.65",
+   "value": 0.65,
+   "unit": "ratio",
+   "range": [
+    0,
+    1
+   ],
+   "calibration": "task-169 C：生成侧回声自检（字符 bigram Dice）阈值。与 selftalk-journal 的 VOICE_DEDUP_SIMILARITY=0.65 对齐，保持两处判重口径一致；验收红线是 24h 内自身输出 Dice≥0.8 的比例为 0，0.65 留出改写空间但不是「一改就过」。"
+  },
+  "ECHO_LOOKBACK": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "echo",
+   "readers": [
+    "echo",
+    "src/maintenance/echo-policy.ts"
+   ],
+   "cluster": "A.15",
+   "valueText": "20",
+   "value": 20,
+   "unit": "条",
+   "range": [
+    1,
+    100
+   ],
+   "calibration": "task-169 C：回声自检最多取最近多少条参照文本（chat log「她」侧 + 自述来源记忆 + 24h 日记合计后截断）。20 条覆盖最近 1–2 天的自身输出；更早的话已经不像「刚才说过」，再扩只会抬高误判率。"
+  },
+  "ECHO_WINDOW_HOURS": {
+   "kind": "number",
+   "timeBase": "none",
+   "heat": "cold",
+   "perArchetype": false,
+   "owner": "echo",
+   "readers": [
+    "echo",
+    "src/maintenance/echo-policy.ts"
+   ],
+   "cluster": "A.15",
+   "valueText": "24",
+   "value": 24,
+   "unit": "hours",
+   "range": [
+    1,
+    168
+   ],
+   "calibration": "task-169 C：回声自检的时间窗（小时），与 selftalk-journal 的 VOICE_DEDUP_WINDOW_MS=24h、验收 M1 的 24h 扫描窗一致；跨天之后同一句话不再算「最近的回声」。"
+  }
+ }
+}

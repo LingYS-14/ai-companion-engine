@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-companion-engine/spec/schema/knowledge.schema.json",
+  "title": "L2 知识条目（v5.2 §6.3）",
+  "specVersion": "v5.3.1",
+  "description": "§6.3 给出 11 个字段的 JSON 样例，但 v5.2 从没把它落成 schema —— 而 §6.4 的 freshness 合成（A17）与 §6.3 的衰减分支都要读它。本文件是补上的那份 schema。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "content",
+    "knowledge_type",
+    "source",
+    "freshness"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^kn_[0-9A-Za-z_]+$"
+    },
+    "content": {
+      "type": "string"
+    },
+    "knowledge_type": {
+      "type": "string",
+      "enum": [
+        "meme",
+        "news",
+        "trend",
+        "fact",
+        "lore"
+      ],
+      "description": "决定 KNOWLEDGE_HALFLIFE 取哪一档：meme 7 / news 3 / trend 14 / fact 365 / lore 9999（天）"
+    },
+    "source": {
+      "type": "string",
+      "description": "形如 web:<url>、player、parasocial"
+    },
+    "source_credibility": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.6
+    },
+    "objective_freshness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0
+    },
+    "social_freshness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0
+    },
+    "freshness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1.0,
+      "x-formula": "freshness = objective_freshness * social_freshness * (1 + log1p(access_count) * 0.1)",
+      "x-spec-ref": "§6.3 A17",
+      "description": "同步公式里 (1 + log1p(access_count)*0.1) 无上界 ⇒ access_count≥100 时 freshness 到 1.46（v5.1 审计已算过 1.4615），越过语义上限 1.0 且不 clamp。Pv3 建议：刷新只作用于 objective/social 两个分量，freshness 用 min(1, …)。"
+    },
+    "access_count": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "ingested_at": {
+      "type": "number"
+    },
+    "worldview_translated": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "x-invariants": [
+    "knowledge_type 必须在 KNOWLEDGE_HALFLIFE 的五个键内，否则衰减无定义。",
+    "lore 的 9999 天是「永不衰减」哨兵值，实现里要按哨兵处理而不是按天数算。"
+  ]
+}

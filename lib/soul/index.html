@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>灵魂 · 工作台</title>
+    <link rel="stylesheet" href="/plugins/ai-companion-engine/soul.css" />
+  </head>
+  <body>
+    <div id="app" class="shell">
+      <header class="top">
+        <div class="brand">
+          <span class="brand-star" aria-hidden="true">✦</span>
+          <span class="brand-name">灵魂</span>
+          <span class="brand-sub">· 工作台</span>
+        </div>
+        <div class="top-right">
+          <span id="status" class="pill" data-state="loading">连接中</span>
+          <span id="clock" class="muted"></span>
+          <button id="refresh" class="btn" type="button">刷新</button>
+        </div>
+      </header>
+
+      <aside class="side">
+        <nav class="nav" aria-label="工作台导航">
+          <a class="nav-item is-active" href="#overview" data-page="overview">概览</a>
+          <a class="nav-item" href="#dialog" data-page="dialog">对话</a>
+          <a class="nav-item" href="#memory" data-page="memory">记忆</a>
+          <a class="nav-item" href="#knowledge" data-page="knowledge">知识</a>
+          <a class="nav-item" href="#intent" data-page="intent">意图</a>
+          <a class="nav-item" href="#settings" data-page="settings">设置</a>
+        </nav>
+        <p class="side-note">状态真源在宿主。这里只读，不代她推进。</p>
+      </aside>
+
+      <main class="main">
+        <section id="page-overview" class="page is-active">
+          <article class="hero card">
+            <div class="hero-avatar">
+              <img id="avatar" class="avatar" alt="" hidden />
+              <div id="avatar-fallback" class="avatar-fallback" aria-hidden="true">灵</div>
+            </div>
+            <div class="hero-text">
+              <h1 id="name" class="name">—</h1>
+              <p id="meta" class="meta">还没读到状态</p>
+              <div class="mood">
+                <span id="mood-dot" class="mood-dot" aria-hidden="true"></span>
+                <span id="mood-label" class="mood-label">—</span>
+              </div>
+            </div>
+          </article>
+
+          <section class="block">
+            <div class="block-head">
+              <h2>关系</h2>
+              <span id="bond-progress" class="muted">—</span>
+            </div>
+            <div id="stage-track" class="track"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-head"><h2>此刻</h2></div>
+            <div id="vitals" class="vitals"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-head">
+              <h2>她记得</h2>
+              <span id="memory-count" class="muted">—</span>
+            </div>
+            <div id="recent" class="list"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-head"><h2>她明白的</h2></div>
+            <div id="knowledge" class="list"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-head"><h2>她正想做什么</h2></div>
+            <div id="intent" class="list"></div>
+          </section>
+
+          <footer class="foot">
+            <span id="chip-sleep" class="chip">睡点 —</span>
+            <span id="chip-memory" class="chip">记忆 —/—</span>
+            <span id="chip-knowledge" class="chip">知识 —</span>
+            <span id="chip-updated" class="chip muted">—</span>
+          </footer>
+        </section>
+
+        <section id="page-dialog" class="page">
+          <div class="chat-block">
+            <div class="block-head">
+              <h2>对话</h2>
+              <span class="muted">她和你的同一段对话，QQ 与这里共享。</span>
+            </div>
+            <div id="chat-log" class="chat-log" aria-live="polite">
+              <div class="chat-empty">还没读到对话。</div>
+            </div>
+            <form id="chat-form" class="chat-form">
+              <input
+                id="chat-input"
+                class="chat-input"
+                type="text"
+                maxlength="2000"
+                autocomplete="off"
+                placeholder="跟她说点什么…"
+              />
+              <button id="chat-send" class="btn btn-primary" type="submit">说</button>
+            </form>
+            <p id="chat-status" class="chat-status"></p>
+          </div>
+        </section>
+
+        <section id="page-memory" class="page">
+          <div class="block">
+            <div class="block-head">
+              <h2>记忆</h2>
+              <span id="memory-page-total" class="muted">—</span>
+            </div>
+            <div id="memory-stats" class="stat-grid"></div>
+          </div>
+          <div class="block">
+            <div class="block-head">
+              <h2>她最近记得的</h2>
+              <span class="muted">只读 · 最近几条</span>
+            </div>
+            <div id="memory-list" class="list"></div>
+            <p class="note">完整记忆流（按时间翻页 / 搜索 / 已忘列表）等 P3 数据接口接上后开放。</p>
+          </div>
+        </section>
+
+        <section id="page-knowledge" class="page">
+          <div class="block">
+            <div class="block-head">
+              <h2>知识</h2>
+              <span id="knowledge-page-count" class="muted">—</span>
+            </div>
+            <p class="note">她读过的书、看过的视频、查过的网页。网页来源统一标「未核实」，不会当成她确认过的事。</p>
+          </div>
+          <div class="block">
+            <div class="block-head"><h2>最近读到的</h2></div>
+            <div id="knowledge-list" class="list"></div>
+            <p class="note">完整知识库（按来源筛选 / 搜索）等 P3 数据接口接上后开放。</p>
+          </div>
+        </section>
+
+        <section id="page-intent" class="page">
+          <div class="block">
+            <div class="block-head">
+              <h2>意图与心事</h2>
+              <span id="intent-page-open" class="muted">—</span>
+            </div>
+            <div id="intent-list" class="list"></div>
+          </div>
+          <div class="block">
+            <div class="block-head">
+              <h2>在等回音</h2>
+              <span id="intent-page-waiting" class="muted">—</span>
+            </div>
+            <div id="intent-waiting"></div>
+          </div>
+        </section>
+
+        <section id="page-settings" class="page">
+          <div class="block">
+            <div class="block-head"><h2>外观</h2></div>
+            <div class="setting-row">
+              <span class="setting-label">主题</span>
+              <div class="seg" id="theme-seg" role="group" aria-label="主题">
+                <button type="button" class="seg-btn" data-theme-set="dark">暗色</button>
+                <button type="button" class="seg-btn" data-theme-set="light">亮色</button>
+              </div>
+            </div>
+            <p class="note">亮色只作用于这个工作台，不影响宿主界面；选择存在本机。</p>
+          </div>
+          <div class="block">
+            <div class="block-head"><h2>她的作息</h2></div>
+            <div id="settings-sleep" class="kv"></div>
+          </div>
+          <div class="block">
+            <div class="block-head"><h2>关于</h2></div>
+            <div id="settings-about" class="kv"></div>
+            <p class="note">工作台只读：展示的是宿主状态文件的投影，不写状态、不替她推进。唯一改写她状态的入口是「对话」页（走 daemon 代理）；「意图」页的「回一句」只写你这一侧的回执，不碰她的状态。</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/plugins/ai-companion-engine/soul.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,1099 @@
+{
+  "meta": {
+    "spec": "v5.3.1",
+    "source": "正式版-v5.3.1.docx §15 附录 A",
+    "generated_by": "tools/audit/build_engine_v531.py",
+    "dump": "C:\\AI\\_audit\\in\\v531.txt",
+    "counts": {
+      "total": 93,
+      "hot": 18,
+      "perArchetype": 10,
+      "groups": 16,
+      "engineScope": 83,
+      "archetypeScope": 10
+    },
+    "selfCheck": {
+      "declared": [
+        93,
+        18,
+        10
+      ],
+      "actual": [
+        93,
+        18,
+        10
+      ],
+      "problems": [],
+      "ok": true
+    },
+    "limits": {
+      "archetypeMax": 40,
+      "hotMax": 20,
+      "clusterMax": 10,
+      "clusterHotMax": 5
+    },
+    "modeThresholds": {
+      "break_mask_max": 0.35,
+      "break_pressure_min": 0.7,
+      "defense_pressure_min": 0.85,
+      "obsession_entropy_min": 0.75,
+      "obsession_valence_max": 0.3,
+      "overdrive_valence_min": 0.75,
+      "overdrive_arousal_min": 0.7,
+      "lazy_energy_max": 0.2
+    },
+    "supplemental": [
+      {
+        "name": "TICK_HOURS",
+        "value": 0.08333333333333333,
+        "unit": "小时",
+        "why": "轮长，附录未登记（NOTES §3.2）"
+      },
+      {
+        "name": "TAINT_WINDOW",
+        "value": 86400,
+        "unit": "秒",
+        "why": "污点观察窗，附录未登记（NOTES §3.2）"
+      }
+    ],
+    "patch": "v5.3.1+patch-v4"
+  },
+  "knobs": {
+    "DECAY_RATE": {
+      "cluster": "A.1a",
+      "valueText": "0.7",
+      "value": 0.7,
+      "kind": "number",
+      "unit": "1/天",
+      "timeBase": "per-day",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "KAPPA_PRESSURE": {
+      "cluster": "A.1a",
+      "valueText": "0.55",
+      "value": 0.55,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "KAPPA_SUPPRESSION": {
+      "cluster": "A.1a",
+      "valueText": "0.2",
+      "value": 0.2,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "PRESSURE_BASELINE": {
+      "cluster": "A.1a",
+      "valueText": "0.2",
+      "value": 0.2,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "TICK_BASE_RESET": {
+      "cluster": "A.1a",
+      "valueText": "0.005",
+      "value": 0.005,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "per-round",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "EMA_ETA": {
+      "cluster": "A.1b",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "per-round",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "LOAD_GAIN_LAMBDA": {
+      "cluster": "A.1b",
+      "valueText": "0.05",
+      "value": 0.05,
+      "kind": "number",
+      "unit": "1/小时",
+      "timeBase": "per-hour",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "SUPPRESSION_BASELINE": {
+      "cluster": "A.1b",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "ENERGY_RECOVERY_RATE": {
+      "cluster": "A.1b",
+      "valueText": "1.0",
+      "value": 1.0,
+      "kind": "number",
+      "unit": "1/小时",
+      "timeBase": "per-hour",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "ENERGY_SUPPRESS_COST": {
+      "cluster": "A.1b",
+      "valueText": "0.02",
+      "value": 0.02,
+      "kind": "number",
+      "unit": "无量纲/轮",
+      "timeBase": "per-round",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "RUMINATION_LAMBDA": {
+      "cluster": "A.1b",
+      "valueText": "0.03",
+      "value": 0.03,
+      "kind": "number",
+      "unit": "1/小时",
+      "timeBase": "per-hour",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "TRUST_MAX_STEP": {
+      "cluster": "A.1b",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "per-round",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "VALENCE_ANCHOR": {
+      "cluster": "A.1b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "AROUSAL_ANCHOR": {
+      "cluster": "A.1b",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "无量纲 —",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "RETRIEVAL_AFFECTING_VARS": {
+      "cluster": "A.2",
+      "valueText": "{\"jealousy\", \"valence\", \"arousal\", \"entropy\"}",
+      "value": [
+        "jealousy",
+        "valence",
+        "arousal",
+        "entropy"
+      ],
+      "kind": "strings",
+      "unit": "",
+      "timeBase": "",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "UNTRUSTED_SOURCES": {
+      "cluster": "A.2",
+      "valueText": "{\"web\", \"parasocial\", \"unknown\"}",
+      "value": [
+        "web",
+        "parasocial",
+        "unknown"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "STATE_INIT": {
+      "cluster": "A.2",
+      "valueText": "见 §9.3",
+      "value": "见 §9.3",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "ACTION_TYPES": {
+      "cluster": "A.2",
+      "valueText": "{\"care\", \"ignore\", \"tease\", \"praise\", \"hurt\", \"promise\"}",
+      "value": [
+        "care",
+        "ignore",
+        "tease",
+        "praise",
+        "hurt",
+        "promise"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "IMMEDIATE_WHITELIST": {
+      "cluster": "A.2",
+      "valueText": "{\"obsession_intrusion\", \"crisis_event\"}",
+      "value": [
+        "obsession_intrusion",
+        "crisis_event"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "CONSOLIDATION_THRESHOLD": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "5",
+      "value": 5,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "INSIGHT_THRESHOLD": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "5",
+      "value": 5,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "KNOWLEDGE_HALFLIFE": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "{meme:7, news:3, trend:14, fact:365, lore:9999}",
+      "value": {
+        "meme": 7,
+        "news": 3,
+        "trend": 14,
+        "fact": 365,
+        "lore": 9999
+      },
+      "kind": "object",
+      "unit": "天",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "COLD_ARCHIVE_DAYS": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "30",
+      "value": 30,
+      "kind": "number",
+      "unit": "天",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "UNRESOLVED_GAIN": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "无量纲/次",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "UNRESOLVED_DECAY": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "0.02",
+      "value": 0.02,
+      "kind": "number",
+      "unit": "1/天",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "HARD_DELETE_RETENTION_DAYS": {
+      "cluster": "A.3a-consolidation",
+      "valueText": "7",
+      "value": 7,
+      "kind": "number",
+      "unit": "天",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MILESTONE_BOND_GAIN": {
+      "cluster": "A.3a-milestone",
+      "valueText": "0.15",
+      "value": 0.15,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "MILESTONE_CAP": {
+      "cluster": "A.3a-milestone",
+      "valueText": "0.2",
+      "value": 0.2,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "MILESTONE_TRIGGER_THRESHOLD": {
+      "cluster": "A.3a-milestone",
+      "valueText": "0.9",
+      "value": 0.9,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MILESTONE_ELIGIBLE_TYPES": {
+      "cluster": "A.3a-milestone",
+      "valueText": "{\"comfort\", \"approach\", \"gift\"}",
+      "value": [
+        "comfort",
+        "approach",
+        "gift"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "MILESTONE_TYPE_SET": {
+      "cluster": "A.3a-milestone",
+      "valueText": "{\"comfort\", \"approach\"}",
+      "value": [
+        "comfort",
+        "approach"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "ACCURACY_GUARDS": {
+      "cluster": "A.3b",
+      "valueText": "{high:0.7, confidence:0.9, low:0.3, valence_coupling:0.5}",
+      "value": {
+        "high": 0.7,
+        "confidence": 0.9,
+        "low": 0.3,
+        "valence_coupling": 0.5
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MEMORY_SUPPRESS_RATE": {
+      "cluster": "A.3b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "RECONSOLIDATION_STORAGE_BOOST": {
+      "cluster": "A.3b",
+      "valueText": "0.02",
+      "value": 0.02,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MEMORY_RECALL_GAIN": {
+      "cluster": "A.3b",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "HIGH_AROUSAL_DECAY_FACTOR": {
+      "cluster": "A.3b",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "HIGH_AROUSAL_THRESHOLD": {
+      "cluster": "A.3b",
+      "valueText": "0.7",
+      "value": 0.7,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "FORGET_VIVIDNESS_THRESHOLD": {
+      "cluster": "A.3b",
+      "valueText": "0.1",
+      "value": 0.1,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "STAGE_THRESHOLD": {
+      "cluster": "A.4",
+      "valueText": "{stranger:[0,0.25), familiar:[0.25,0.55), close:[0.55,0.80), beloved:[0.80,1.01)}",
+      "value": null,
+      "kind": "literal",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "PACING_TABLE": {
+      "cluster": "A.4",
+      "valueText": "{familiar:15, close:40, beloved:80}",
+      "value": {
+        "familiar": 15,
+        "close": 40,
+        "beloved": 80
+      },
+      "kind": "object",
+      "unit": "轮",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "PACING_RATE": {
+      "cluster": "A.4",
+      "valueText": "{shallow:0.016667, mid:0.012, deep:0.00625}",
+      "value": {
+        "shallow": 0.016667,
+        "mid": 0.012,
+        "deep": 0.00625
+      },
+      "kind": "object",
+      "unit": "/轮",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "ATTACHMENT_QUADRANT": {
+      "cluster": "A.4",
+      "valueText": "见 §5.1",
+      "value": "见 §5.1",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "EXPRESSION_TABLE": {
+      "cluster": "A.4",
+      "valueText": "{(quadrant, stage) → style}",
+      "value": null,
+      "kind": "literal",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": true
+    },
+    "EMOTION_DYNAMICS": {
+      "cluster": "A.5a",
+      "valueText": "见 §4.3",
+      "value": "见 §4.3",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "VALENCE_TABLE": {
+      "cluster": "A.5a",
+      "valueText": "{praise:(+0.3,-1.0), praise_other:(0.0,-0.5), promise_kept:(+0.15,-1.2), ignored:(0.0,-0.6)}",
+      "value": null,
+      "kind": "literal",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "OUTCOME_REWARD": {
+      "cluster": "A.5a",
+      "valueText": "{\"安抚\":0.8, \"离开\":-0.5, \"冷战\":-0.5, \"升温\":1.0, \"无视\":-0.2}",
+      "value": {
+        "安抚": 0.8,
+        "离开": -0.5,
+        "冷战": -0.5,
+        "升温": 1.0,
+        "无视": -0.2
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "SIGNAL_SCALE": {
+      "cluster": "A.5a",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "LOAD_WEIGHTS": {
+      "cluster": "A.5a",
+      "valueText": "{entropy_shame:0.1, entropy_surprise:0.05, dissonance:0.15, jealousy:0.2}",
+      "value": {
+        "entropy_shame": 0.1,
+        "entropy_surprise": 0.05,
+        "dissonance": 0.15,
+        "jealousy": 0.2
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "ALPHA_BASE": {
+      "cluster": "A.5a",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "PRESSURE_GAIN_WEIGHTS": {
+      "cluster": "A.5a",
+      "valueText": "{jealousy:0.5, shame:0.4, fear:0.3}",
+      "value": {
+        "jealousy": 0.5,
+        "shame": 0.4,
+        "fear": 0.3
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "AFFECTION_EVENT_CAP": {
+      "cluster": "A.5b",
+      "valueText": "{gift:0.03, approach:0.02, comfort:0.02, appraisal_only:0.05}",
+      "value": {
+        "gift": 0.03,
+        "approach": 0.02,
+        "comfort": 0.02,
+        "appraisal_only": 0.05
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "AFFECTION_EVENT_CAP_DEFAULT": {
+      "cluster": "A.5b",
+      "valueText": "0.02",
+      "value": 0.02,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "AFFECTION_SCALE": {
+      "cluster": "A.5b",
+      "valueText": "0.05",
+      "value": 0.05,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "TRUST_GAIN_POS": {
+      "cluster": "A.5b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "TRUST_GAIN_NEG": {
+      "cluster": "A.5b",
+      "valueText": "-2.5",
+      "value": -2.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "TRUST_TRIGGER_THRESHOLD": {
+      "cluster": "A.5b",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "RUMINATION_PROB_WEIGHT": {
+      "cluster": "A.5b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "DEDUP_PENALTY": {
+      "cluster": "A.5c",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "OBSESSION_PROB_BASE": {
+      "cluster": "A.5c",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "OBSESSION_PROB_THRESHOLD": {
+      "cluster": "A.5c",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "OBSESSION_GAIN_WEIGHT": {
+      "cluster": "A.5c",
+      "valueText": "0.15",
+      "value": 0.15,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "OBSESSION_RUMINATION_ADD": {
+      "cluster": "A.5c",
+      "valueText": "0.2",
+      "value": 0.2,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "RETRIEVAL_WEIGHTS": {
+      "cluster": "A.6",
+      "valueText": "{specificity:0.30, semantic:0.18, vividness:0.10, recency:0.22, emotion:0.10, state_dependent:0.05, access_count:0.05}",
+      "value": {
+        "specificity": 0.3,
+        "semantic": 0.18,
+        "vividness": 0.1,
+        "recency": 0.22,
+        "emotion": 0.1,
+        "state_dependent": 0.05,
+        "access_count": 0.05
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false,
+      "specValue": {
+        "specificity": 0.3,
+        "semantic": 0.18,
+        "vividness": 0.22,
+        "recency": 0.1,
+        "emotion": 0.1,
+        "state_dependent": 0.05,
+        "access_count": 0.05
+      },
+      "origin": "patch-v4",
+      "note": "F32：vividness 与 recency 互换权重（0.22↔0.10），总和不便；理由是对话连续性——刚说过的话必须排在旧的高鲜明度记忆之前，见 docs/DEVELOPMENT.md 4.3"
+    },
+    "RETRIEVAL_PENALTIES": {
+      "cluster": "A.6",
+      "valueText": "{suppressed:-0.30, taint:-0.10}",
+      "value": {
+        "suppressed": -0.3,
+        "taint": -0.1
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "CAPACITY_BASE": {
+      "cluster": "A.6",
+      "valueText": "5",
+      "value": 5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false
+    },
+    "RETRIEVAL_VIVIDNESS_BOOST": {
+      "cluster": "A.6",
+      "valueText": "0.05",
+      "value": 0.05,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "DRIFT_EWMA_THRESHOLD": {
+      "cluster": "A.7a",
+      "valueText": "0.15",
+      "value": 0.15,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "DRIFT_CONSISTENCY_THRESHOLD": {
+      "cluster": "A.7a",
+      "valueText": "0.7",
+      "value": 0.7,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "DRIFT_DAMPING_RATE": {
+      "cluster": "A.7a",
+      "valueText": "0.02",
+      "value": 0.02,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "DRIFT_RATE_WHEN_EVIDENCE": {
+      "cluster": "A.7a",
+      "valueText": "DRIFT_DAMPING_RATE",
+      "value": "DRIFT_DAMPING_RATE",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "MAGNITUDE_CAP": {
+      "cluster": "A.7a",
+      "valueText": "{value_shifts:0.05, ocean:0.02}",
+      "value": {
+        "value_shifts": 0.05,
+        "ocean": 0.02
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "MILESTONE_TRUST_GAIN": {
+      "cluster": "A.7a",
+      "valueText": "3.0",
+      "value": 3.0,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "LEARN_EVIDENCE_HALFLIFE": {
+      "cluster": "A.7b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "LEARN_BOND_HALFLIFE": {
+      "cluster": "A.7b",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "LEARN_MAGNITUDE_CAP": {
+      "cluster": "A.7b",
+      "valueText": "0.05",
+      "value": 0.05,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "EXPECTATION_WINDOW": {
+      "cluster": "A.7b",
+      "valueText": "50",
+      "value": 50,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "EXPECTATION_PRIOR_INTENSITY": {
+      "cluster": "A.7b",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "EXPECTATION_RECALC_INTERVAL": {
+      "cluster": "A.7b",
+      "valueText": "5",
+      "value": 5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "TRACE_FLUSH_INTERVAL_SEC": {
+      "cluster": "A.8",
+      "valueText": "5",
+      "value": 5,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "TRACE_BUFFER_SIZE": {
+      "cluster": "A.8",
+      "valueText": "200",
+      "value": 200,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "SLEEP_OFFSET_HOURS": {
+      "cluster": "A.8",
+      "valueText": "6",
+      "value": 6,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "SLEEP_BASE_HOUR": {
+      "cluster": "A.8",
+      "valueText": "3",
+      "value": 3,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MASK_LEAK_THRESHOLD": {
+      "cluster": "A.9",
+      "valueText": "1.0",
+      "value": 1.0,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": true
+    },
+    "SUPPRESS_LOAD_GAIN": {
+      "cluster": "A.9",
+      "valueText": "0.15",
+      "value": 0.15,
+      "kind": "number",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "MODE_THRESHOLDS": {
+      "cluster": "A.9",
+      "valueText": "见 §4.6（8 个键）",
+      "value": {
+        "break_mask_max": 0.35,
+        "break_pressure_min": 0.7,
+        "defense_pressure_min": 0.85,
+        "obsession_entropy_min": 0.75,
+        "obsession_valence_max": 0.3,
+        "overdrive_valence_min": 0.75,
+        "overdrive_arousal_min": 0.7,
+        "lazy_energy_max": 0.2
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "hot",
+      "perArchetype": false,
+      "derivedFrom": "§4.6"
+    },
+    "CRISIS_SEVERITY_MIN": {
+      "cluster": "A.9",
+      "valueText": "0.8",
+      "value": 0.8,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "CRISIS_SUPPRESSION": {
+      "cluster": "A.9",
+      "valueText": "0.5",
+      "value": 0.5,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "CURIOSITY_TARGETS": {
+      "cluster": "A.10",
+      "valueText": "见 §10.2",
+      "value": "见 §10.2",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": true
+    },
+    "CHEAP_PREFILTER_THRESHOLD": {
+      "cluster": "A.10",
+      "valueText": "{relevance:0.3, dedup:0.9}",
+      "value": {
+        "relevance": 0.3,
+        "dedup": 0.9
+      },
+      "kind": "object",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "KNOWLEDGE_SOCIAL_FRESHNESS_DELTA": {
+      "cluster": "A.10",
+      "valueText": "{ignored:-0.1, engaged:+0.2}",
+      "value": null,
+      "kind": "literal",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    },
+    "WORLDVIEW_TRANSLATE_ENABLED": {
+      "cluster": "A.10",
+      "valueText": "由 CANON_MODE 决定",
+      "value": "由 CANON_MODE 决定",
+      "kind": "text",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "RELATION_SOURCES": {
+      "cluster": "A.10",
+      "valueText": "{\"player\", \"qq_contact_verified\"}",
+      "value": [
+        "player",
+        "qq_contact_verified"
+      ],
+      "kind": "strings",
+      "unit": "—",
+      "timeBase": "—",
+      "heat": "cold",
+      "perArchetype": false
+    },
+    "DRIFT_GUARD_MAX": {
+      "cluster": "A.10",
+      "valueText": "0.3",
+      "value": 0.3,
+      "kind": "number",
+      "unit": "无量纲",
+      "timeBase": "—",
+      "heat": "warm",
+      "perArchetype": false
+    }
+  }
+}
