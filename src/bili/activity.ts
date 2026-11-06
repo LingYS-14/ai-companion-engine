@@ -138,3 +138,66 @@ export function planActivity(input: SocialActivityInput): SocialActivityPlan {
   }
   return { action: "watch", reason: "今天可做的互动都做完了：只看不写" };
 }
+
+/**
+ * 写接口返回这些码，说明是**账号本身发不出去**（未转正、等级不足、csrf 失效），
+ * 换个视频重试也一样，只会白花模型钱，还会让 B 站风控更难看。
+ * 遇到就当天不再尝试该动作。
+ */
+export const ACCOUNT_BLOCKED_CODES: ReadonlySet<number> = new Set([
+  -107, // 评论：账号未转正
+  -101, // 账号未登录
+  -111, // csrf 校验失败
+  36701, // 弹幕：账号等级不足（旧文案）
+  36703, // 弹幕：被禁言
+  36705, // 弹幕：等级不足（新版文案）
+]);
+
+/** 账本条目里参与当天预算计算的最小形状（main.mjs 直接把 JSON 行传进来）。 */
+export interface SocialLedgerLike {
+  readonly at: number;
+  readonly action: string;
+  readonly ok: boolean;
+  readonly code: number;
+}
+
+export interface SocialDaySummary {
+  /** 今天**成功**的对外动作数（弹幕 + 评论 + 点赞）。失败不该占额度。 */
+  readonly actions: number;
+  readonly danmaku: number;
+  readonly comments: number;
+  /** 今天已被账号权限挡住的动作类型；调用方据此把对应额度置 0。 */
+  readonly blocked: ReadonlySet<string>;
+}
+
+/**
+ * 把当天账本折成预算读数。
+ *
+ * 两个刻意的取舍：
+ * - 只有 `ok === true` 才算“做过了”：否则一次网络抖动或一次账号限制就能把她一整天的额度烧光；
+ * - 账号级失败（{@link ACCOUNT_BLOCKED_CODES}）单独记成 blocked，让调用方当天不再重试。
+ */
+export function summarizeSocialDay(
+  entries: ReadonlyArray<SocialLedgerLike>,
+): SocialDaySummary {
+  let actions = 0;
+  let danmaku = 0;
+  let comments = 0;
+  const blocked = new Set<string>();
+  for (const entry of entries) {
+    if (entry.ok === true) {
+      if (entry.action === "danmaku") {
+        danmaku += 1;
+        actions += 1;
+      } else if (entry.action === "comment") {
+        comments += 1;
+        actions += 1;
+      } else if (entry.action === "like") {
+        actions += 1;
+      }
+      continue;
+    }
+    if (ACCOUNT_BLOCKED_CODES.has(entry.code)) blocked.add(entry.action);
+  }
+  return { actions, danmaku, comments, blocked };
+}

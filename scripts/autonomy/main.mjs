@@ -85,7 +85,7 @@ import { makeOneBotSpeaker } from "../../dist/qq/onebot-speak.js";
 import { createPortActions } from "../../dist/autonomy/port.js";
 import { createStandalonePort, SPEAK_QUIET_FROM, SPEAK_QUIET_TO } from "../../dist/autonomy/standalone.js";
 // 2026-11 社交主动性：读视频详情 → 决定动作 → 写弹幕/评论/点赞。写接口必须登录态。
-import { planActivity } from "../../dist/bili/activity.js";
+import { ACCOUNT_BLOCKED_CODES, planActivity, summarizeSocialDay } from "../../dist/bili/activity.js";
 import { getVideoDetail, likeVideo, postComment, postDanmaku } from "../../dist/bili/write.js";
 import {
   buildInsightPrompt,
@@ -967,9 +967,9 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
     const nowMs = Date.now();
     const { entries, today } = readSocialLedger(nowMs);
     const todayEntries = entries.filter((entry) => dayKey(entry.at, tzOffsetMinutes) === today);
-    const writes = todayEntries.filter(
-      (entry) => entry.action === "danmaku" || entry.action === "comment" || entry.action === "like",
-    );
+    // 预算口径在 activity.ts（纯函数、可单测）：只有成功才算“做过了”，
+    // 账号级失败（未转正/等级不足）记成 blocked，当天不再尝试那个动作。
+    const summary = summarizeSocialDay(todayEntries);
     const lastAt = entries.reduce((max, entry) => (entry.at > max ? entry.at : max), 0);
     const session = loadBiliSession(dataDir, characterId);
     const deps = { fetchFn: fetch, now: () => nowMs, log, ...(session === null ? {} : { session }) };
@@ -1019,9 +1019,9 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
     const plan = planActivity({
       now: nowMs,
       lastActionAt: lastAt > 0 ? lastAt : null,
-      todayActions: writes.length,
-      todayDanmaku: writes.filter((entry) => entry.action === "danmaku").length,
-      todayComments: writes.filter((entry) => entry.action === "comment").length,
+      todayActions: summary.actions,
+      todayDanmaku: summary.danmaku,
+      todayComments: summary.comments,
       video: {
         bvid: detail.bvid,
         durationSec: detail.durationSec > 0 ? detail.durationSec : video.durationSec,
@@ -1035,8 +1035,11 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
         intervalMs: socialEveryMin * 60_000,
         dailyMax: socialDailyMax,
         // 给“评论”和“点赞”各留一个位置：默认 4 次/天 = 2 弹幕 + 1 评论 + 1 赞。
-        danmakuDailyMax: Math.max(0, socialDailyMax - socialCommentDailyMax - 1),
-        commentDailyMax: socialCommentDailyMax,
+        // 账号被挡住的类型当天置 0：换视频重试也发不出去，只会白花模型调用。
+        danmakuDailyMax: summary.blocked.has("danmaku")
+          ? 0
+          : Math.max(0, socialDailyMax - socialCommentDailyMax - 1),
+        commentDailyMax: summary.blocked.has("comment") ? 0 : socialCommentDailyMax,
         likeEnabled: true,
       },
     });
@@ -1103,6 +1106,10 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
       `[social] action=${action} bvid=${detail.bvid} ok=${String(result.ok)} code=${String(result.code)}` +
         `${generated ? " generated=1" : ""} reason=${result.message.slice(0, 80)}`,
     );
+    // 账号级失败只提示一次：写进账本后，当天该动作的额度会一直是 0，不会再重试。
+    if (!result.ok && ACCOUNT_BLOCKED_CODES.has(result.code)) {
+      log(`[social] 账号限制（code=${String(result.code)}）：今天不再尝试 ${action}，需要账号转正/提升等级后才能发`);
+    }
     return { action, ok: result.ok, reason: result.message, generated, bvid: detail.bvid };
   };
 
