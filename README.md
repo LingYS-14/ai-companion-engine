@@ -1,5 +1,7 @@
 # AI Companion Engine
 
+[![gate](https://github.com/LingYS-14/ai-companion-engine/actions/workflows/gate.yml/badge.svg?branch=main)](https://github.com/LingYS-14/ai-companion-engine/actions/workflows/gate.yml)
+
 一个可以长期运行的 AI 伙伴内核：有自己的时间感、能量与睡眠节律、长期记忆、自主意图，以及两条聊天通道（QQ / 网页工作台），默认通过 DeepSeek 的 OpenAI 兼容接口调用模型。
 
 > 这不是聊天机器人框架，而是一个「有状态」的陪伴内核：
