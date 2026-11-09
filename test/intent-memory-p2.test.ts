@@ -385,6 +385,17 @@ describe("P2 记忆回放：三类各取所需", () => {
     expect(out.note).toContain("只消化，不生成新候选");
   });
 
+  it("她自己说出去的话不参与回放，也不生成 continue_thread 线头（单话题根因）", () => {
+    const memories = [
+      rec("own", { source: "proactive", unresolved_score: 0.9, vividness: 0.95, self_relevance: 0.9 }),
+      rec("real", { unresolved_score: 0.9 }),
+    ];
+    const out = selectReplay({ memories, nowMs: NOW });
+    expect(out.items.some((i) => i.memoryId === "own")).toBe(false);
+    expect(out.items.some((i) => i.memoryId === "real")).toBe(true);
+    expect(replayThreads(out.items, memories, NOW).some((t) => t.id === "replay:own")).toBe(false);
+  });
+
   it("回放项 → continue_thread 线头（dormant 不转成线头），staleMin 从最近被想起算", () => {
     const memories = [rec("a", { unresolved_score: 0.9, last_accessed: NOW - 90 * 60_000 })];
     const out = selectReplay({ memories, nowMs: NOW });

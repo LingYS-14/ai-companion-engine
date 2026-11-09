@@ -4,6 +4,7 @@ import {
   decideReRaise,
   dropExhaustedIntentions,
   exhaustedSpeakKinds,
+  retireSelfReferentialIntentions,
   whyPhrase,
 } from "../src/orchestrator/intent/intent-lifecycle.js";
 import { newIntention } from "../src/orchestrator/intent/bus.js";
@@ -225,5 +226,35 @@ describe("F312 复核（supervisor）：生产形状 + 重提纯函数", () => {
         reRaiseQuietMin: Number.NaN,
       }),
     ).toThrow(RangeError);
+  });
+});
+
+describe("自述意图退休（2026-11-09 单话题根因）", () => {
+  const selfVoiced = (id: string): IntentionRecord =>
+    newIntention({
+      id,
+      at: AT,
+      kind: "continue_thread",
+      goal: "我想把上次没说完的事接上——想把「我主动开口说：连续睡四个钟头会把人睡成半块石头」接上",
+      why: "缺口变大",
+    });
+
+  it("goal 里带她自己那句话的未结意图被退休，其它意图与已结束的原样保留", () => {
+    const own = selfVoiced("itn-self");
+    const other = made("itn-other");
+    const done = { ...selfVoiced("itn-self-done"), status: "done" as const };
+    const out = retireSelfReferentialIntentions([own, other, done]);
+    expect(out.retired).toEqual(["itn-self"]);
+    const after = new Map(out.records.map((record) => [record.id, record]));
+    expect(after.get("itn-self")?.status).toBe("dropped");
+    expect(after.get("itn-other")?.status).toBe("pending");
+    expect(after.get("itn-self-done")?.status).toBe("done");
+  });
+
+  it("没有可退休的记录时原样返回同一个数组", () => {
+    const records = [made("itn-a"), made("itn-b")];
+    const out = retireSelfReferentialIntentions(records);
+    expect(out.retired).toEqual([]);
+    expect(out.records).toBe(records);
   });
 });

@@ -17,10 +17,13 @@
  */
 
 import { deriveQuintuple, type EpisodeSource } from "./episode.js";
+import { isSelfAuthored } from "../../memory/echo-sources.js";
 
 /** 回放需要的只读记忆视图（结构类型，不 import memory 实现）。 */
 export interface ReplayMemory extends EpisodeSource {
   readonly id: string;
+  /** 记忆来源（proactive/selftalk/chat_reply 是她自己说出去的话，见 echo-sources.ts）。 */
+  readonly source?: string;
   readonly content?: string;
   readonly tags?: readonly string[];
   readonly vividness?: number;
@@ -116,6 +119,11 @@ export function selectReplay(input: SelectReplayInput): SelectReplayResult {
   const perKind: Record<ReplayKind, ReplayItem[]> = { unfinished: [], echo: [], dormant: [] };
 
   for (const memory of input.memories) {
+    // 她自己说出去的话不进回放：否则"没聊完的事"会被她自己的上一句话从内部续命，
+    // continue_thread 连着同一句话无限续杯（2026-11-09 单话题实测：replay=3、top 恒为同一条）。
+    // 这是 echo-sources.ts 里同一条素材边界在回放端的补接（召回/selftalk 已接）。
+    if (isSelfAuthored(memory.source)) continue;
+
     const ageDays = Math.max(0, (input.nowMs - memory.created_at) / DAY_MS);
     const sinceAccessDays = Math.max(0, (input.nowMs - (memory.last_accessed ?? memory.created_at)) / DAY_MS);
 

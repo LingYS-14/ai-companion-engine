@@ -62,6 +62,45 @@ export function dropExhaustedIntentions(
 }
 
 /**
+ * 她自己的话不是"没聊完的事"。
+ *
+ * 主动开口成功后，close-loop 会把她说的原话写成一条记忆（`我主动开口说：「…」`）。旧版
+ * replay 把这条自述记忆当成 continue_thread 的线头，于是下一拍又"接着"同一句话——实测同一个
+ * 自述线程连续十几小时占着候选 top（`itn-continue_thread-1794144441775`），对话永远只有一个话题。
+ *
+ * replay 端已经不再由自述记忆生成线头；本函数只负责一次性退休**已经落盘**的旧意图，
+ * 不是硬拦新的主动开口（新意图仍然照常生成）。
+ */
+export const SELF_SPOKEN_GOAL_MARKER = "我主动开口说";
+
+export interface RetireSelfReferentialResult {
+  /** 退休之后的记录（没有变化时返回**同一个数组**） */
+  readonly records: readonly IntentionRecord[];
+  /** 这一轮被退休的 id */
+  readonly retired: readonly string[];
+}
+
+export function retireSelfReferentialIntentions(
+  records: readonly IntentionRecord[],
+  marker: string = SELF_SPOKEN_GOAL_MARKER,
+): RetireSelfReferentialResult {
+  const retired: string[] = [];
+  let next: readonly IntentionRecord[] = records;
+  for (const record of records) {
+    const open =
+      record.status === "pending" ||
+      record.status === "active" ||
+      record.status === "blocked" ||
+      record.status === "held";
+    if (!open) continue;
+    if (!record.goal.includes(marker)) continue;
+    next = [...next.filter((item) => item.id !== record.id), dropIntention(record, null)];
+    retired.push(record.id);
+  }
+  return { records: next, retired };
+}
+
+/**
  * F239：被**暂时性**硬闸拦下的意图，闸放开后应当重新排队。
  *
  * 为什么单独做：`gate.ts` 的 quota 是"这一小时没有额度"，不是"这件事她不该做"。

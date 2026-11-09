@@ -94,4 +94,22 @@ describe("v5.4-P1 §4.2：retrieve → touch 抬高 base_activation", () => {
     expect(rows.length).toBeGreaterThan(0);
     expect(rows[0]?.source).toBe("proactive");
   });
+
+  it("自述记忆不会在召回时被抬成「没聊完的事」：unresolved_score 保持 0", async () => {
+    const rt = await SoulRuntime.open(conf, clock);
+    const own = rt.remember({
+      content: "我主动开口说：「连续睡四个钟头会把人睡成半块石头」",
+      source: "proactive",
+      tags: ["睡觉"],
+      vividness: 0.7,
+      selfRelevance: 0.6,
+    });
+    const theirs = rt.remember({ content: "他说今天要早点睡。", source: "player", tags: ["睡觉"], vividness: 0.7 });
+
+    const rows = rt.recall("睡觉");
+    expect(rows.length).toBeGreaterThanOrEqual(2);
+
+    expect(latestPut(own.id)["unresolved_score"]).toBe(0);
+    expect(latestPut(theirs.id)["unresolved_score"] as number).toBeGreaterThan(0);
+  });
 });

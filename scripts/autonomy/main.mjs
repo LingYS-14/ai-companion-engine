@@ -133,7 +133,7 @@ import {
 } from "../../dist/orchestrator/intent/intent-file.js";
 import { activate, newIntention } from "../../dist/orchestrator/intent/bus.js";
 import { applyHardGate } from "../../dist/orchestrator/intent/gate.js";
-import { decideReRaise, dropExhaustedIntentions, exhaustedSpeakKinds, pickSpeakableIntention, reviveBlockedIntentions, whyPhrase } from "../../dist/orchestrator/intent/intent-lifecycle.js";
+import { decideReRaise, dropExhaustedIntentions, exhaustedSpeakKinds, pickSpeakableIntention, retireSelfReferentialIntentions, reviveBlockedIntentions, whyPhrase } from "../../dist/orchestrator/intent/intent-lifecycle.js";
 import {
   deriveTrigger,
   dueIntentionsSafe,
@@ -1485,7 +1485,16 @@ const learnStatePath = join(dataDir, `autonomy-learn-${characterId}.json`);
           beatTemporal = temporal;
           // 意图表：上一拍留下的"我想做什么"。它的存在会让缺口方向更稳定，
           // 也让同一类意图不会每拍都像第一次浮现。
-          const intentRecords = readIntentionsFile();
+          let intentRecords = readIntentionsFile();
+          // 2026-11-09：她自己的话不是"没聊完的事"——旧版 replay 由自述记忆生成的
+          // continue_thread 会把同一句话无限续杯（单话题根因）。replay 端已不再产出这类线头，
+          // 这里顺手把已经落盘的旧自述意图退休，避免它继续占着 open 名额。
+          const retiredSelf = retireSelfReferentialIntentions(intentRecords);
+          if (retiredSelf.retired.length > 0) {
+            writeIntentionsFile(retiredSelf.records);
+            log(`[intent] 退休自述意图：${retiredSelf.retired.join(",")}`);
+            intentRecords = retiredSelf.records;
+          }
           // F312：同类重复刹车——窗口内已经说够次数的类别，这一拍不再浮现/开口。
           // 只读意图表、不改累积器，也不动她已有的记录（纯函数判据，见 intent-lifecycle）。
           const suppressedKinds = exhaustedSpeakKinds(intentRecords, nowMs);
