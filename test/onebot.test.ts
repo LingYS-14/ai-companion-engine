@@ -108,6 +108,8 @@ function harness(
     channelDown?: boolean;
     /** P0-F：回信入记忆旁路 */
     rememberReply?: OneBotBridgeDeps["rememberReply"];
+    /** 2026-11-09：被闸门挡下的对方消息入记忆旁路 */
+    rememberInbound?: OneBotBridgeDeps["rememberInbound"];
     /** S3b/M5：回信时间一致性摘要旁路 */
     recordTimeClaims?: OneBotBridgeDeps["recordTimeClaims"];
   } = {},
@@ -158,6 +160,7 @@ function harness(
     },
     ...(over.readImage === undefined ? {} : { readImage: over.readImage }),
     ...(over.rememberReply === undefined ? {} : { rememberReply: over.rememberReply }),
+    ...(over.rememberInbound === undefined ? {} : { rememberInbound: over.rememberInbound }),
     ...(over.recordTimeClaims === undefined ? {} : { recordTimeClaims: over.recordTimeClaims }),
     ...(over.voice !== true
       ? {}
@@ -879,5 +882,41 @@ describe("S3b 回信时间一致性日志", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(h.logs.join("\n")).toContain("时间一致性日志写入失败");
     expect(h.logs.join("\n")).toContain("async metrics down");
+  });
+});
+
+// ---------- 2026-11-09（单话题根因）：被闸门挡下的对方消息也入记忆 ----------
+
+describe("对方的话入记忆（单话题根因配套）", () => {
+  it("被频率闸挡下：记住他说的话，但不回信", async () => {
+    const rememberInbound = vi.fn();
+    const h = harness({ rememberInbound });
+    const bridge = new OneBotBridge(fakeRuntime(), opts({ maxPerHour: 1 }), h.deps);
+    const first = await bridge.handle(event({ message_id: 9101 }));
+    expect(first.reason).toBe("replied");
+    const second = await bridge.handle(
+      event({ message_id: 9102, message: [{ type: "text", data: { text: "我今天其实有点累" } }] }),
+    );
+    expect(second.reason).toBe("gap");
+    expect(rememberInbound).toHaveBeenCalledTimes(1);
+    expect(rememberInbound).toHaveBeenCalledWith("我今天其实有点累");
+  });
+
+  it("真回信的那一条不重复写（turn() 自己会写）", async () => {
+    const rememberInbound = vi.fn();
+    const h = harness({ rememberInbound });
+    const bridge = new OneBotBridge(fakeRuntime(), opts(), h.deps);
+    const r = await bridge.handle(event());
+    expect(r.reason).toBe("replied");
+    expect(rememberInbound).not.toHaveBeenCalled();
+  });
+
+  it("不是目标 peer：不写", async () => {
+    const rememberInbound = vi.fn();
+    const h = harness({ rememberInbound });
+    const bridge = new OneBotBridge(fakeRuntime(), opts(), h.deps);
+    const r = await bridge.handle(event({ user_id: 999001 }));
+    expect(r.reason).toBe("not-peer");
+    expect(rememberInbound).not.toHaveBeenCalled();
   });
 });

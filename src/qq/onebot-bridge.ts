@@ -191,6 +191,14 @@ export interface OneBotBridgeDeps {
    * 只挂回信分支；主动开口由主进程在发送成功后自己记，若挂在这里会重复计数。
    * 旁路语义同 `rememberReply`：同步抛错或异步拒绝都只记日志，绝不影响「已经回复成功」。
    */
+  /**
+   * 可选（2026-11-09 单话题根因）：把**对方这次说的正文**写进记忆。
+   *
+   * 回信成功时 `turn()` 自己会写一条入站记忆；但这一轮被闸门挡下（gap/rate）时
+   * 那句话就彻底消失了——她的记忆里于是只剩自述。这里补上被挡下的那一半，
+   * 旁路语义同 `rememberReply`：抛错只记日志，绝不影响判定结果。
+   */
+  rememberInbound?(text: string): unknown;
   recordTimeClaims?(reply: string): unknown;
   log?(line: string): void;
 }
@@ -580,6 +588,26 @@ export class OneBotBridge {
     return name;
   }
 
+  /** 旁路写一条「对方的话」：同步抛错与异步拒绝都只记日志（同 rememberReply 的语义）。 */
+  private rememberInbound(text: string): void {
+    const remember = this.deps.rememberInbound;
+    if (remember === undefined) return;
+    try {
+      const result = remember(text);
+      if (result instanceof Promise) {
+        void result.catch((err: unknown) => {
+          this.deps.log?.(
+            `[qq] 对方的话写记忆失败（不影响判定）：${err instanceof Error ? err.message : String(err)}`,
+          );
+        });
+      }
+    } catch (err) {
+      this.deps.log?.(
+        `[qq] 对方的话写记忆失败（不影响判定）：${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
   private async process(event: OneBotEvent): Promise<OneBotHandleResult> {
     // 一个回合一把写锁：只覆盖真正会写状态的路径，转写/判定这类只读步骤不占锁。
     const release = this.deps.beginTurn?.();
@@ -622,6 +650,11 @@ export class OneBotBridge {
     const now = this.deps.now();
     const localHour = this.deps.localHour();
     const decision = decideOneBotReply({ inbound, opts: this.opts, state: this.state, now, localHour });
+    // 2026-11-09（单话题根因）：被闸门挡下的对方消息也要落库。
+    // 回信成功的那一条由 turn() 自己写，不在这里重复写。
+    if (!decision.ok && inbound.userId === this.opts.peer && inbound.text.trim() !== "") {
+      this.rememberInbound(inbound.text);
+    }
     if (!decision.ok) {
       return {
         acted: false,
