@@ -71,6 +71,11 @@ export interface ProactiveComposeInput {
   readonly peerName: string;
   readonly localHour: number;
   readonly history?: readonly string[];
+  /**
+   * 2026-11-09（单话题根因）：她自己最近说过的话。
+   * 与 history 分开——history 是"他最近说过什么"（可当素材），avoid 是"别再重复"清单。
+   */
+  readonly avoid?: readonly string[];
   /** 主动开口也可以带一点记得的事；空则只按话题说 */
   readonly recall?: DialogueRecall;
   /**
@@ -157,6 +162,7 @@ export function composeDialogue(input: ReplyComposeInput | ProactiveComposeInput
     const user = proactiveUserPrompt({
       topic: input.topic,
       history: input.history ?? [],
+      ...(input.avoid === undefined ? {} : { avoid: input.avoid }),
     });
     return { system, user, intent: "proactive", recall: usageOf(input.recall) };
   }

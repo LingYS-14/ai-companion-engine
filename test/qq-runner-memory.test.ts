@@ -109,6 +109,21 @@ describe("P0-F 装配：startAutonomyQq 把 rememberReply 接进 OneBotBridge de
     expect(seed["tags"]).toEqual(["chat", "qq"]);
   });
 
+  it("2026-11-09（单话题根因）：deps.rememberInbound 存在；调用后写 player/inbound + tags [chat, qq]", () => {
+    const dir = tempDir();
+    const { remember } = start(dir);
+    const deps = captured.deps[0] as { rememberInbound?: (text: string) => void };
+    expect(typeof deps.rememberInbound).toBe("function");
+
+    deps.rememberInbound?.("我今天其实有点累");
+    expect(remember).toHaveBeenCalledTimes(1);
+    const seed = remember.mock.calls[0]?.[0] as unknown as Record<string, unknown>;
+    expect(seed["content"]).toBe("我今天其实有点累");
+    expect(seed["source"]).toBe("player");
+    expect(seed["direction"]).toBe("inbound");
+    expect(seed["tags"]).toEqual(["chat", "qq"]);
+  });
+
   it("stop() 释放写锁（existsSync .writer-lock === false）", () => {
     const dir = tempDir();
     const { stop } = start(dir);

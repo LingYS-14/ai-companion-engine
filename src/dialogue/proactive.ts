@@ -218,12 +218,21 @@ export const TOPIC_HINT: Readonly<Record<ProactiveTopic, string>> = {
 export function proactiveUserPrompt(input: {
   readonly topic: ProactiveTopic;
   readonly history: readonly string[];
+  /** 2026-11-09（单话题根因）：她自己最近说过的话；只当"别再重复"清单，不当对话素材。 */
+  readonly avoid?: readonly string[];
 }): string {
   const hist = input.history.length === 0 ? "（没有之前的对话）" : input.history.join("\n");
+  const avoid = input.avoid ?? [];
   return [
     `${TOPIC_HINT[input.topic]}。`,
     "这次是你**主动**开口，不是回消息：不要回应对方没说出口的话，第一句就是你的话。",
     "一两句就好，不超过 40 字，不用 emoji。",
+    ...(avoid.length === 0
+      ? []
+      : [
+          "你最近已经说过这些，不要再用同样的话题或句式（换一个新的角度）：",
+          ...avoid.map((line) => `- ${line}`),
+        ]),
     "最近的对话（供你避免重复，不必复述）：",
     hist,
     "只输出你要发的那一句。",

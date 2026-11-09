@@ -105,7 +105,7 @@ function harness(history?: ChatHistoryStore): Harness {
 }
 
 describe("P2：QQ 桥与网页共享 ChatLog", () => {
-  it("传了 store：主动开口的 history 读共享流水，只看他说的，且能跨通道看到网页那句", async () => {
+  it("传了 store：主动开口读共享流水——对方的话进 history，她的那句只进「别再重复」清单", async () => {
     const log = tempLog();
     log.append({ atMs: NOW - 3_000, who: "peer", text: "这是网页里说的话", channel: "web" });
     log.append({ atMs: NOW - 2_000, who: "her", text: "网页里她的那句", channel: "web" });
@@ -116,7 +116,8 @@ describe("P2：QQ 桥与网页共享 ChatLog", () => {
 
     const prompt = h.generated.at(-1)?.prompt ?? "";
     expect(prompt).toContain("这是网页里说的话");
-    expect(prompt).not.toContain("网页里她的那句");
+    expect(prompt).toContain("你最近已经说过这些");
+    expect(prompt).toContain("- 网页里她的那句");
   });
 
   it("回信成功后向共享流水追加 peer/her 两条（channel=qq）", async () => {

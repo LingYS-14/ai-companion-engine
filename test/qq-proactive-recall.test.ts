@@ -153,8 +153,8 @@ describe("窗口桥主动开口：接召回", () => {
   });
 });
 
-describe("窗口桥主动开口：history 过滤掉她自己", () => {
-  it("只把对方说过的话拼进 prompt，不含她上一句", async () => {
+describe("窗口桥主动开口：history 里带上她最近说过的话", () => {
+  it("对方说过的话 + 她自己的最近三句（标注「不要重复」）都进 prompt", async () => {
     const h = harness();
     h.inbox.push(msg("m1", "在吗"));
     // 先跑一轮回信：历史里会落下 {peer:"在吗"} + {her:"主动一句♪"}
@@ -166,8 +166,10 @@ describe("窗口桥主动开口：history 过滤掉她自己", () => {
 
     const prompt = h.generated.at(-1)!.prompt;
     expect(prompt).toContain(`${PEER}：在吗`);
-    expect(prompt).not.toContain("主动一句♪");
-    expect(prompt).not.toContain("我：");
+    // 2026-11-09：不再过滤掉她自己，而是标注清楚供"避免重复"用——否则模型看不见自己刚说过什么，
+    // 会连续几次挑同一个话题。
+    expect(prompt).toContain("你最近已经说过这些，不要再用同样的话题或句式");
+    expect(prompt).toContain("- 主动一句♪");
   });
 
   it("回信路径的 history 语义不动：她说过的话仍然进【刚刚聊过的】", async () => {

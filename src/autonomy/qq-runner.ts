@@ -318,6 +318,33 @@ export function rememberReplyThrough(
   };
 }
 
+/**
+ * 2026-11-09（单话题根因）：把对方说的话写进记忆（source=player，direction=inbound）。
+ *
+ * 回信成功时 turn() 自己会写；这里补的是**被闸门挡下**的那些消息——否则她的记忆里
+ * 只有自述，召回与回放只能在回音里打转。失败隔离同 rememberReplyThrough。
+ */
+export function rememberInboundThrough(
+  runtime: Pick<BrainPort, "remember">,
+  log: (line: string) => void,
+): (text: string) => void {
+  return (text: string) => {
+    try {
+      const stored = runtime.remember({
+        content: text,
+        source: "player",
+        tags: ["chat", "qq"],
+        vividness: 0.6,
+        selfRelevance: 0.5,
+        direction: "inbound",
+      });
+      log(`[qq] 对方的话记忆：${stored.stored ? `已写 ${stored.id}` : `未写（${stored.reason}）`}`);
+    } catch (err) {
+      log(`[qq] 对方的话写记忆失败（不影响本回合）：${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+}
+
 /** 启动常驻进程侧的 QQ 接待。返回 null 表示没有可用模型凭据（不静默降级成"乱回"）。 */
 export function startAutonomyQq(input: AutonomyQqInput): AutonomyQqHandle | null {
   if (input.llm === null) {
@@ -495,6 +522,8 @@ export function startAutonomyQq(input: AutonomyQqInput): AutonomyQqHandle | null
     ...(input.echoCheck === undefined ? {} : { echoCheck: input.echoCheck }),
     // P0-F：回信真的发出去后写一条 chat_reply/outbound 记忆；失败只记日志。
     rememberReply: rememberReplyThrough(input.runtime, input.log),
+    // 2026-11-09（单话题根因）：被闸门挡下的对方消息也落成记忆，别让他的话凭空消失。
+    rememberInbound: rememberInboundThrough(input.runtime, input.log),
     // S3b（M5）：回信成功后的时间一致性日志。只记计数/时长大数，不落回答原文；
     // 样本凑不齐（没有 peer 历史）时 elapsed 类 claim 会记 unverified，不编基准。
     recordTimeClaims: (reply: string): void => {

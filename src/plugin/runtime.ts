@@ -120,6 +120,7 @@ import {
 import { vetOceanDelta, vetWrite } from "../firewall/guard.js";
 import { deriveInsightProvenance } from "../firewall/insight.js";
 import { decayUnresolved, shouldForgetNow, tickVividness, updateUnresolved } from "../memory/lifecycle.js";
+import { isSelfAuthored } from "../memory/echo-sources.js";
 import { knobNumber } from "../engine/config.js";
 import { consumedPathFor, journalSeeds, saveConsumedAt } from "../maintenance/selftalk-consumer.js";
 import { readTrace, TraceLog } from "../trace/trace.js";
@@ -1423,10 +1424,15 @@ export class SoulRuntime implements BrainPort {
       // §4.2 on_retrieve：必须走 store.touch()，它同时抬升 base_activation——
       // 只在这里手写 access_count/last_accessed 会让 ACT-R 激活永远停在 0，记忆迟早全冷掉。
       this.store.touch(rec.id, now);
+      // 她说出去的话不该被"回忆"成心事：proactive/selftalk/chat_reply 是已经说出口的产物，
+      // 再对这些记忆累加 unresolved_score 会把自己的回音变成"没聊完的事"，与 replay 端同一处边界。
+      const selfAuthored = isSelfAuthored(rec.source);
       this.store.mutate(rec.id, {
         vividness: Math.min(1, rec.vividness + boost),
         // 参数名是 resolvedNow：同向回忆是"又想起一次、还没想完"，所以传 !aligned
-        unresolved_score: updateUnresolved(rec, !aligned, 0, this.cfg),
+        unresolved_score: selfAuthored
+          ? (rec.unresolved_score ?? 0)
+          : updateUnresolved(rec, !aligned, 0, this.cfg),
       });
       let underTaint = rec.retrieved_under_taint;
       if (stateTainted && underTaint !== true) {
