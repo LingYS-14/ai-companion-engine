@@ -421,6 +421,8 @@ export class OneBotBridge {
       // 回信路径的 history 语义不动——那是「对话记录」，主动开口这里只需要「他最近说过什么」。
       // P2：有共享 store 时读 store（网页里说过的话也看得到），没有就用本进程内存（旧行为）。
       history: this.historyForPrompt().filter((e) => e.who === "peer").map((e) => `${peerName}：${e.text}`),
+      // 2026-11-09（单话题根因）：最近 3 条她自己的话单独当"别再重复"清单，不混进对话 history。
+      avoid: this.historyForPrompt().filter((e) => e.who === "her").slice(-3).map((e) => e.text),
       // 召回接在系统提示后面；没有 recall 依赖时不传，旧行为一个字不变。
       ...(recalled === undefined ? {} : { recall: recalled }),
       // P1 真出口：把"这一拍她想说什么"交给 composeDialogue；没有就不传（旧行为一个字不变）

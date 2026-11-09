@@ -420,16 +420,11 @@ export class QQBridge {
       topic: decision.topic,
       peerName: this.opts.peer,
       localHour: this.deps.localHour(),
-      // 只留对方说过的话会让她看不见自己刚说过什么：连续几次挑同一个话题
-      // （2026-11-09 实测：五条主动消息都在说"睡了四个钟头"）。这里把最近 3 条她自己的话
-      // 也带上并标注清楚——prompt 里本来就有"供你避免重复"这一行，模型需要素材才用得上。
-      history: [
-        ...this.history.filter((e) => e.who === "peer").map((e) => `${this.opts.peer}：${e.text}`),
-        ...this.history
-          .filter((e) => e.who === "her")
-          .slice(-3)
-          .map((e) => `你自己最近说过（不要重复这些内容）：${e.text}`),
-      ],
+      // 只留对方说过的话：她不能顺着自己的上一句往下续写（首句逐字重复）。
+      history: this.history.filter((e) => e.who === "peer").map((e) => `${this.opts.peer}：${e.text}`),
+      // 2026-11-09（单话题根因）：最近 3 条她自己的话单独当"别再重复"清单，
+      // 不混进对话 history——混进去她会接着自己的话说（实测五条主动消息都在说"睡了四个钟头"）。
+      avoid: this.history.filter((e) => e.who === "her").slice(-3).map((e) => e.text),
       // 召回接在系统提示后面；没有 recall 依赖时不传，旧行为一个字不变。
       ...(recalled === undefined ? {} : { recall: recalled }),
       // P1 真出口：意向引擎的自述（没有就不传，旧行为一个字不变）

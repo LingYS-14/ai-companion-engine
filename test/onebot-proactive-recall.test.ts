@@ -215,7 +215,7 @@ describe("OneBot 桥主动开口：接召回", () => {
 });
 
 describe("OneBot 桥主动开口：history 过滤掉她自己", () => {
-  it("只把对方说过的话拼进 prompt，不含她上一句", async () => {
+  it("对方的话进 history；她自己的上一句只进「别再重复」清单", async () => {
     const h = harness();
     // 先跑一轮回信：历史里会落下 {peer:"在吗"} + {her:"主动一句♪"}
     const first = await h.bridge.handle(event());
@@ -227,7 +227,8 @@ describe("OneBot 桥主动开口：history 过滤掉她自己", () => {
 
     const prompt = h.generated.at(-1)!.prompt;
     expect(prompt).toContain("用户：在吗");
-    expect(prompt).not.toContain("主动一句♪");
+    expect(prompt).toContain("你最近已经说过这些");
+    expect(prompt).toContain("- 主动一句♪");
     expect(prompt).not.toContain("我：");
   });
 

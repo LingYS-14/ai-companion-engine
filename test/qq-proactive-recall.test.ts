@@ -168,7 +168,8 @@ describe("窗口桥主动开口：history 里带上她最近说过的话", () =>
     expect(prompt).toContain(`${PEER}：在吗`);
     // 2026-11-09：不再过滤掉她自己，而是标注清楚供"避免重复"用——否则模型看不见自己刚说过什么，
     // 会连续几次挑同一个话题。
-    expect(prompt).toContain("你自己最近说过（不要重复这些内容）：主动一句♪");
+    expect(prompt).toContain("你最近已经说过这些，不要再用同样的话题或句式");
+    expect(prompt).toContain("- 主动一句♪");
   });
 
   it("回信路径的 history 语义不动：她说过的话仍然进【刚刚聊过的】", async () => {
